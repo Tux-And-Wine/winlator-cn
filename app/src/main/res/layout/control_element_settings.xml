@@ -46,10 +46,10 @@
             android:id="@+id/SBScale"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:suffix="%"
-            app:step="5"
+            app:maxValue="400"
             app:minValue="50"
-            app:maxValue="300" />
+            app:step="5"
+            app:suffix="%" />
 
         <TextView
             android:layout_width="wrap_content"
