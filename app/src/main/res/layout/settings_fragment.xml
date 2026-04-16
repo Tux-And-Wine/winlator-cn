@@ -292,6 +292,18 @@
                         android:layout_height="wrap_content"
                         android:text="@string/use_android_clipboard_on_Wine"
                         android:layout_marginTop="8dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/clipboard_charset"
+                        android:layout_marginTop="8dp" />
+
+                    <Spinner
+                        style="@style/ComboBox"
+                        android:id="@+id/SClipboardCharset"
+                        android:layout_width="match_parent"
+                        android:entries="@array/clipboard_charset_entries" />
                 </LinearLayout>
 
                 <TextView

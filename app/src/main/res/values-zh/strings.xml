@@ -347,4 +347,5 @@
     <string name="full">全开</string>
     <string name="ddraw_wrapper" translatable="false">DDraw 封装器</string>
     <string name="renderer">Renderer</string>
+    <string name="clipboard_charset">剪贴板字符集</string>
 </resources>

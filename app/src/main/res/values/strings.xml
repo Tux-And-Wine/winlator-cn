@@ -347,4 +347,5 @@
     <string name="full">Full</string>
     <string name="ddraw_wrapper" translatable="false">DDraw Wrapper</string>
     <string name="renderer">Renderer</string>
+    <string name="clipboard_charset">Clipboard Charset</string>
 </resources>

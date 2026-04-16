@@ -159,4 +159,11 @@
         <item>DMA Buffer</item>
         <item>Native Hardware Buffer</item>
     </string-array>
+    <string-array name="clipboard_charset_entries">
+        <item>GBK</item>
+        <item>Shift_JIS</item>
+        <item>BIG5</item>
+        <item>UTF-8</item>
+        <item>Windows-1251</item>
+    </string-array>
 </resources>

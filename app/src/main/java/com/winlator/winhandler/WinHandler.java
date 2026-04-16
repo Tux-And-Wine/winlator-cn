@@ -1,5 +1,6 @@
 package com.winlator.winhandler;
 
+import android.content.SharedPreferences;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 
@@ -18,6 +19,7 @@ import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.charset.Charset;
 import java.util.ArrayDeque;
 import java.util.concurrent.Executors;
 
@@ -212,7 +214,9 @@ public class WinHandler {
     public void setClipboardData(final String data) {
         addAction(() -> {
             sendData.rewind();
-            byte[] bytes = data.getBytes();
+            SharedPreferences sp = this.activity.getSharedPreferences("com.winlator_preferences", 0);
+            String charset = sp.getString("clipboard_charset", "GBK");
+            byte[] bytes = data.getBytes(Charset.forName(charset));
             sendData.put(RequestCodes.SET_CLIPBOARD_DATA);
             sendData.putInt(bytes.length);
 
