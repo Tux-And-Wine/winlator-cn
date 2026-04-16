@@ -348,4 +348,6 @@
     <string name="ddraw_wrapper" translatable="false">DDraw 封装器</string>
     <string name="renderer">Renderer</string>
     <string name="clipboard_charset">剪贴板字符集</string>
+    <string name="running_notification_text">正在运行</string>
+    <string name="running_notification_desc">Winlator 运行状态</string>
 </resources>

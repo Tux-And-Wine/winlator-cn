@@ -144,6 +144,8 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
         AppUtils.keepScreenOn(this);
         setContentView(R.layout.xserver_display_activity);
 
+        startService(new Intent(this, ForegroundService.class));
+
         final PreloaderDialog preloaderDialog = new PreloaderDialog(this);
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
         boolean useAndroidClipboardOnWine = preferences.getBoolean("use_android_clipboard_on_wine", false);
@@ -420,6 +422,7 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
     }
 
     private void exit() {
+        stopService(new Intent(this, ForegroundService.class));
         winHandler.stop();
         if (environment != null) environment.stopEnvironmentComponents();
 
