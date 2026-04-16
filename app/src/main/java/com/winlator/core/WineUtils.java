@@ -53,14 +53,21 @@ public abstract class WineUtils {
     }
 
     public static void setSystemFont(WineRegistryEditor userRegistry, String faceName) {
-        byte[] fontNormalData = (new MSLogFont()).setFaceName(faceName).toByteArray();
-        byte[] fontBoldData = (new MSLogFont()).setFaceName(faceName).setWeight(700).toByteArray();
-        userRegistry.setHexValues("Control Panel\\Desktop\\WindowMetrics", "CaptionFont", fontBoldData);
-        userRegistry.setHexValues("Control Panel\\Desktop\\WindowMetrics", "IconFont", fontNormalData);
-        userRegistry.setHexValues("Control Panel\\Desktop\\WindowMetrics", "MenuFont", fontNormalData);
-        userRegistry.setHexValues("Control Panel\\Desktop\\WindowMetrics", "MessageFont", fontNormalData);
-        userRegistry.setHexValues("Control Panel\\Desktop\\WindowMetrics", "SmCaptionFont", fontNormalData);
-        userRegistry.setHexValues("Control Panel\\Desktop\\WindowMetrics", "StatusFont", fontNormalData);
+        //byte[] fontNormalData = (new MSLogFont()).setFaceName(faceName).toByteArray();
+        //byte[] fontBoldData = (new MSLogFont()).setFaceName(faceName).setWeight(700).toByteArray();
+        //userRegistry.setHexValues("Control Panel\\Desktop\\WindowMetrics", "CaptionFont", fontBoldData);
+        //userRegistry.setHexValues("Control Panel\\Desktop\\WindowMetrics", "IconFont", fontNormalData);
+        //userRegistry.setHexValues("Control Panel\\Desktop\\WindowMetrics", "MenuFont", fontNormalData);
+        //userRegistry.setHexValues("Control Panel\\Desktop\\WindowMetrics", "MessageFont", fontNormalData);
+        //userRegistry.setHexValues("Control Panel\\Desktop\\WindowMetrics", "SmCaptionFont", fontNormalData);
+        //userRegistry.setHexValues("Control Panel\\Desktop\\WindowMetrics", "StatusFont", fontNormalData);
+        //中文显示会有问题，暂时改为注销这些字体配置
+        userRegistry.removeValue("Control Panel\\Desktop\\WindowMetrics", "CaptionFont");
+        userRegistry.removeValue("Control Panel\\Desktop\\WindowMetrics", "IconFont");
+        userRegistry.removeValue("Control Panel\\Desktop\\WindowMetrics", "MenuFont");
+        userRegistry.removeValue("Control Panel\\Desktop\\WindowMetrics", "MessageFont");
+        userRegistry.removeValue("Control Panel\\Desktop\\WindowMetrics", "SmCaptionFont");
+        userRegistry.removeValue("Control Panel\\Desktop\\WindowMetrics", "StatusFont");
     }
 
     public static void applySystemTweaks(Context context, WineInfo wineInfo) {

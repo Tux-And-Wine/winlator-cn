@@ -59,5 +59,21 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths"/>
         </provider>
+        <activity
+            android:name="bin.mt.file.content.MTDataFilesWakeUpActivity"
+            android:exported="true"
+            android:taskAffinity="com.winlator.MTDataFilesWakeUp"
+            android:excludeFromRecents="true"
+            android:noHistory="true" />
+        <provider
+            android:name="bin.mt.file.content.MTDataFilesProvider"
+            android:permission="android.permission.MANAGE_DOCUMENTS"
+            android:exported="true"
+            android:authorities="com.winlator.MTDataFilesProvider"
+            android:grantUriPermissions="true">
+            <intent-filter>
+                <action android:name="android.content.action.DOCUMENTS_PROVIDER" />
+            </intent-filter>
+        </provider>
     </application>
 </manifest>

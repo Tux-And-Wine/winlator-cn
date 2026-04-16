@@ -377,7 +377,7 @@ public abstract class AppUtils {
 
     public static void setActivityTheme(Activity activity) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(activity);
-        int appTheme = preferences.getInt("app_theme", SettingsFragment.APP_THEME_DARK);
+        int appTheme = preferences.getInt("app_theme", SettingsFragment.APP_THEME_LIGHT);
         if (appTheme == SettingsFragment.APP_THEME_LIGHT) {
             activity.setTheme(R.style.AppThemeLight);
         }

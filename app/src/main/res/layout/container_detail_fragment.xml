@@ -296,12 +296,14 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:visibility="gone"
                             android:text="@string/system_font" />
 
                         <Spinner
                             style="@style/ComboBox"
                             android:id="@+id/SSystemFont"
                             android:layout_width="match_parent"
+                            android:visibility="gone"
                             android:entries="@array/system_font_entries" />
 
                         <TextView
