@@ -43,9 +43,11 @@ import com.winlator.contentdialog.VortekConfigDialog;
 import com.winlator.core.AppUtils;
 import com.winlator.core.Callback;
 import com.winlator.container.DXWrapperPicker;
+import com.winlator.core.DefaultVersion;
 import com.winlator.core.EnvVars;
 import com.winlator.core.FileUtils;
 import com.winlator.container.GraphicsDriverPicker;
+import com.winlator.core.GeneralComponents;
 import com.winlator.core.KeyValueSet;
 import com.winlator.core.PreloaderDialog;
 import com.winlator.core.StringUtils;
@@ -163,6 +165,10 @@ public class ContainerDetailFragment extends Fragment {
         final Spinner sWinVersion = view.findViewById(R.id.SWinVersion);
         sWinVersion.setTag((byte)-1);
 
+        final Spinner sBox64Version = view.findViewById(R.id.SBox64Version);
+        String box64Version = isEditMode() ? container.getBox64Version() : DefaultVersion.BOX64;
+        GeneralComponents.initViews(GeneralComponents.Type.BOX64, view.findViewById(R.id.Box64Toolbox), sBox64Version, box64Version, DefaultVersion.BOX64);
+
         final Spinner sBox64Preset = view.findViewById(R.id.SBox64Preset);
         Box64PresetManager.loadSpinner(sBox64Preset, isEditMode() ? container.getBox64Preset() : preferences.getString("box64_preset", Box64Preset.DEFAULT));
 
@@ -199,6 +205,7 @@ public class ContainerDetailFragment extends Fragment {
                 String cpuListWoW64 = cpuListViewWoW64.getCheckedCPUListAsString();
                 byte startupSelection = (byte)sStartupSelection.getSelectedItemPosition();
                 String box64Preset = Box64PresetManager.getSpinnerSelectedId(sBox64Preset);
+                String box64VersionSelected = StringUtils.parseIdentifier(sBox64Version.getSelectedItem());
                 String desktopTheme = getDesktopTheme(view);
 
                 if (isEditMode()) {
@@ -218,6 +225,7 @@ public class ContainerDetailFragment extends Fragment {
                     container.setHUDMode(hudMode);
                     container.setStartupSelection(startupSelection);
                     container.setBox64Preset(box64Preset);
+                    container.setBox64Version(box64VersionSelected);
                     container.setDesktopTheme(desktopTheme);
                     container.saveData();
 
@@ -246,6 +254,7 @@ public class ContainerDetailFragment extends Fragment {
                     data.put("hudMode", hudMode);
                     data.put("startupSelection", startupSelection);
                     data.put("box64Preset", box64Preset);
+                    data.put("box64Version", box64VersionSelected);
                     data.put("desktopTheme", desktopTheme);
 
                     if (wineInfos.size() > 1) {
