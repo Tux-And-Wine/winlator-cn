@@ -407,6 +407,15 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
                 debugDialog.show();
                 drawerLayout.closeDrawers();
                 break;
+            case R.id.menu_item_fix_perms:
+                Executors.newSingleThreadExecutor().execute(() -> {
+                    try {
+                        Runtime.getRuntime().exec(new String[]{"chmod", "-R", "777", rootFS.getRootDir().getAbsolutePath()});
+                    } catch (Exception e) {}
+                    AppUtils.showToast(this, R.string.fix_perms_done);
+                });
+                drawerLayout.closeDrawers();
+                break;
             case R.id.menu_item_touchpad_help:
                 showTouchpadHelpDialog();
                 break;

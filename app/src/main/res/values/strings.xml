@@ -350,5 +350,7 @@
     <string name="renderer">Renderer</string>
     <string name="clipboard_charset">Clipboard Charset</string>
     <string name="running_notification_text">Running</string>
+    <string name="fix_perms">Fix Permissions</string>
+    <string name="fix_perms_done">Permissions fixed</string>
     <string name="running_notification_desc">Winlator running status</string>
 </resources>

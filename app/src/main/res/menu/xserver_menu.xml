@@ -11,6 +11,7 @@
         <item android:icon="@drawable/icon_screen_effect" android:id="@+id/menu_item_screen_effect" android:title="@string/screen_effect" />
         <item android:icon="@drawable/icon_pip_mode" android:id="@+id/menu_item_pip_mode" android:title="@string/pip_mode" />
         <item android:icon="@drawable/icon_debug" android:id="@+id/menu_item_logs" android:title="@string/logs" />
+        <item android:icon="@drawable/icon_debug" android:id="@+id/menu_item_fix_perms" android:title="@string/fix_perms" />
         <item android:icon="@drawable/icon_help" android:id="@+id/menu_item_touchpad_help" android:title="@string/touchpad_help" />
         <item android:icon="@drawable/icon_exit" android:id="@+id/menu_item_exit" android:title="@string/exit" />
     </group>
