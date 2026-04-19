@@ -376,74 +376,63 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         final GLRenderer renderer = xServerView.getRenderer();
-        switch (item.getItemId()) {
-            case R.id.menu_item_keyboard:
-                AppUtils.showKeyboard(this);
-                drawerLayout.closeDrawers();
-                break;
-            case R.id.menu_item_input_controls:
-                showInputControlsDialog();
-                drawerLayout.closeDrawers();
-                break;
-            case R.id.menu_item_toggle_fullscreen:
-                renderer.toggleFullscreen();
-                drawerLayout.closeDrawers();
-                break;
-            case R.id.menu_item_task_manager:
-                (new TaskManagerDialog(this)).show();
-                drawerLayout.closeDrawers();
-                break;
-            case R.id.menu_item_active_windows:
-                (new ActiveWindowsDialog(this)).show();
-                drawerLayout.closeDrawers();
-                break;
-            case R.id.menu_item_magnifier:
-                if (magnifierView == null) {
-                    final FrameLayout container = findViewById(R.id.FLXServerDisplay);
-                    magnifierView = new MagnifierView(this);
-                    magnifierView.setZoomButtonCallback((value) -> {
-                        renderer.setMagnifierZoom(Mathf.clamp(renderer.getMagnifierZoom() + value, 1.0f, 3.0f));
-                        magnifierView.setZoomValue(renderer.getMagnifierZoom());
-                    });
+        int itemId = item.getItemId();
+        if (itemId == R.id.menu_item_keyboard) {
+            AppUtils.showKeyboard(this);
+            drawerLayout.closeDrawers();
+        } else if (itemId == R.id.menu_item_input_controls) {
+            showInputControlsDialog();
+            drawerLayout.closeDrawers();
+        } else if (itemId == R.id.menu_item_toggle_fullscreen) {
+            renderer.toggleFullscreen();
+            drawerLayout.closeDrawers();
+        } else if (itemId == R.id.menu_item_task_manager) {
+            (new TaskManagerDialog(this)).show();
+            drawerLayout.closeDrawers();
+        } else if (itemId == R.id.menu_item_active_windows) {
+            (new ActiveWindowsDialog(this)).show();
+            drawerLayout.closeDrawers();
+        } else if (itemId == R.id.menu_item_magnifier) {
+            if (magnifierView == null) {
+                final FrameLayout container = findViewById(R.id.FLXServerDisplay);
+                magnifierView = new MagnifierView(this);
+                magnifierView.setZoomButtonCallback((value) -> {
+                    renderer.setMagnifierZoom(Mathf.clamp(renderer.getMagnifierZoom() + value, 1.0f, 3.0f));
                     magnifierView.setZoomValue(renderer.getMagnifierZoom());
-                    magnifierView.setHideButtonCallback(() -> {
-                        container.removeView(magnifierView);
-                        magnifierView = null;
-                    });
-                    container.addView(magnifierView);
-                }
-                drawerLayout.closeDrawers();
-                break;
-            case R.id.menu_item_screen_effect:
-                (new ScreenEffectDialog(this)).show();
-                drawerLayout.closeDrawers();
-                break;
-            case R.id.menu_item_pip_mode:
-                PictureInPictureParams pipParams = (new PictureInPictureParams.Builder())
+                });
+                magnifierView.setZoomValue(renderer.getMagnifierZoom());
+                magnifierView.setHideButtonCallback(() -> {
+                    container.removeView(magnifierView);
+                    magnifierView = null;
+                });
+                container.addView(magnifierView);
+            }
+            drawerLayout.closeDrawers();
+        } else if (itemId == R.id.menu_item_screen_effect) {
+            (new ScreenEffectDialog(this)).show();
+            drawerLayout.closeDrawers();
+        } else if (itemId == R.id.menu_item_pip_mode) {
+            PictureInPictureParams pipParams = (new PictureInPictureParams.Builder())
                     .setAspectRatio(screenInfo.aspectRatio())
                     .build();
-                enterPictureInPictureMode(pipParams);
-                drawerLayout.closeDrawers();
-                break;
-            case R.id.menu_item_logs:
-                debugDialog.show();
-                drawerLayout.closeDrawers();
-                break;
-            case R.id.menu_item_fix_perms:
-                Executors.newSingleThreadExecutor().execute(() -> {
-                    try {
-                        Runtime.getRuntime().exec(new String[]{"chmod", "-R", "777", rootFS.getRootDir().getAbsolutePath()});
-                    } catch (Exception e) {}
-                    AppUtils.showToast(this, R.string.fix_perms_done);
-                });
-                drawerLayout.closeDrawers();
-                break;
-            case R.id.menu_item_touchpad_help:
-                showTouchpadHelpDialog();
-                break;
-            case R.id.menu_item_exit:
-                exit();
-                break;
+            enterPictureInPictureMode(pipParams);
+            drawerLayout.closeDrawers();
+        } else if (itemId == R.id.menu_item_logs) {
+            debugDialog.show();
+            drawerLayout.closeDrawers();
+        } else if (itemId == R.id.menu_item_fix_perms) {
+            Executors.newSingleThreadExecutor().execute(() -> {
+                try {
+                    Runtime.getRuntime().exec(new String[]{"chmod", "-R", "777", rootFS.getRootDir().getAbsolutePath()});
+                } catch (Exception e) {
+                }
+                AppUtils.showToast(this, R.string.fix_perms_done);
+            });
+            drawerLayout.closeDrawers();
+        } else if (itemId == R.id.menu_item_touchpad_help) {
+            showTouchpadHelpDialog();
+        } else if (itemId == R.id.menu_item_exit) {
+            exit();
         }
         return true;
     }

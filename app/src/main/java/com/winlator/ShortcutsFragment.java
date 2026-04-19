@@ -189,22 +189,17 @@ public class ShortcutsFragment extends BaseFileManagerFragment<Shortcut> {
 
             listItemMenu.setOnMenuItemClickListener((menuItem) -> {
                 int itemId = menuItem.getItemId();
-                switch (itemId) {
-                    case R.id.menu_item_settings:
-                        clearClipboard();
-                        (new ShortcutSettingsDialog(ShortcutsFragment.this, shortcut)).show();
-                        break;
-                    case R.id.menu_item_copy:
-                    case R.id.menu_item_cut:
-                        instantiateClipboard(shortcut, itemId == R.id.menu_item_cut);
-                        break;
-                    case R.id.menu_item_remove:
-                        clearClipboard();
-                        ContentDialog.confirm(context, R.string.do_you_want_to_remove_this_file, () -> {
-                            shortcut.remove();
-                            refreshContent();
-                        });
-                        break;
+                if (itemId == R.id.menu_item_settings) {
+                    clearClipboard();
+                    (new ShortcutSettingsDialog(ShortcutsFragment.this, shortcut)).show();
+                } else if (itemId == R.id.menu_item_copy || itemId == R.id.menu_item_cut) {
+                    instantiateClipboard(shortcut, itemId == R.id.menu_item_cut);
+                } else if (itemId == R.id.menu_item_remove) {
+                    clearClipboard();
+                    ContentDialog.confirm(context, R.string.do_you_want_to_remove_this_file, () -> {
+                        shortcut.remove();
+                        refreshContent();
+                    });
                 }
                 return true;
             });

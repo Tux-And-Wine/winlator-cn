@@ -190,19 +190,15 @@ public class TaskManagerDialog extends ContentDialog implements OnGetProcessInfo
         listItemMenu.setOnMenuItemClickListener((menuItem) -> {
             int itemId = menuItem.getItemId();
             final WinHandler winHandler = activity.getWinHandler();
-            switch (itemId) {
-                case R.id.menu_item_process_affinity:
-                    showProcessorAffinityDialog(processInfo);
-                    break;
-                case R.id.menu_item_bring_to_front:
-                    winHandler.bringToFront(processInfo.name);
-                    dismiss();
-                    break;
-                case R.id.menu_item_end_process:
-                    ContentDialog.confirm(activity, R.string.do_you_want_to_end_this_process, () -> {
-                        winHandler.killProcess(null, processInfo.pid);
-                    });
-                    break;
+            if (itemId == R.id.menu_item_process_affinity) {
+                showProcessorAffinityDialog(processInfo);
+            } else if (itemId == R.id.menu_item_bring_to_front) {
+                winHandler.bringToFront(processInfo.name);
+                dismiss();
+            } else if (itemId == R.id.menu_item_end_process) {
+                ContentDialog.confirm(activity, R.string.do_you_want_to_end_this_process, () -> {
+                    winHandler.killProcess(null, processInfo.pid);
+                });
             }
             return true;
         });

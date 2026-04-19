@@ -7,7 +7,12 @@
     <attr name="textSize" format="dimension" />
     <attr name="colorPrimaryText" format="color" />
     <attr name="colorSecondaryText" format="color" />
+    <attr name="colorPrimarySurface" format="color" />
     <attr name="colorSecondarySurface" format="color" />
+    <attr name="colorAccent" format="color" />
+    <attr name="colorError" format="color" />
+    <attr name="popupMenuBackground" format="reference" />
+    <attr name="panelBackground" format="reference" />
     <attr name="toolboxBackground" format="reference" />
     <attr name="preloaderBackground" format="reference" />
     <attr name="progressBarIndeterminateImage" format="reference" />

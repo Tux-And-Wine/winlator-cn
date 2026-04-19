@@ -549,33 +549,28 @@ public class ContainerDetailFragment extends Fragment {
 
         popupMenu.setOnMenuItemClickListener((menuItem) -> {
             int itemId = menuItem.getItemId();
-            switch (itemId) {
-                case R.id.menu_item_open_directory:
-                    openDirectoryCallback = (path) -> {
-                        drive.path = path;
-                        editText.setText(path);
-                    };
+            if (itemId == R.id.menu_item_open_directory) {
+                openDirectoryCallback = (path) -> {
+                    drive.path = path;
+                    editText.setText(path);
+                };
 
-                    Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
-                    intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, Uri.fromFile(Environment.getExternalStorageDirectory()));
-                    activity.startActivityFromFragment($this, intent, MainActivity.OPEN_DIRECTORY_REQUEST_CODE);
-                    break;
-                case R.id.menu_item_downloads:
-                    drive.path = AppUtils.DIRECTORY_DOWNLOADS;
-                    editText.setText(AppUtils.DIRECTORY_DOWNLOADS);
-                    break;
-                case R.id.menu_item_internal_storage:
-                    drive.path = AppUtils.INTERNAL_STORAGE;
-                    editText.setText(AppUtils.INTERNAL_STORAGE);
-                    break;
-                default:
-                    Container container = manager.getContainerById(menuItem.getOrder());
-                    if (container != null) {
-                        String path = container.getRootDir()+"/.wine/drive_c";
-                        drive.path = path;
-                        editText.setText(path);
-                    }
-                    break;
+                Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+                intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, Uri.fromFile(Environment.getExternalStorageDirectory()));
+                activity.startActivityFromFragment($this, intent, MainActivity.OPEN_DIRECTORY_REQUEST_CODE);
+            } else if (itemId == R.id.menu_item_downloads) {
+                drive.path = AppUtils.DIRECTORY_DOWNLOADS;
+                editText.setText(AppUtils.DIRECTORY_DOWNLOADS);
+            } else if (itemId == R.id.menu_item_internal_storage) {
+                drive.path = AppUtils.INTERNAL_STORAGE;
+                editText.setText(AppUtils.INTERNAL_STORAGE);
+            } else {
+                Container container = manager.getContainerById(menuItem.getOrder());
+                if (container != null) {
+                    String path = container.getRootDir() + "/.wine/drive_c";
+                    drive.path = path;
+                    editText.setText(path);
+                }
             }
             return true;
         });
