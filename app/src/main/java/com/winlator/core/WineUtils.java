@@ -86,6 +86,7 @@ public abstract class WineUtils {
             registryEditor.setStringValue("Software\\Classes\\.reg", null, "REGfile");
             registryEditor.setStringValue("Software\\Classes\\.reg", "Content Type", "application/reg");
             registryEditor.setStringValue("Software\\Classes\\REGfile\\Shell\\Open\\command", null, "C:\\windows\\regedit.exe /C \"%1\"");
+            registryEditor.setStringValue("Software\\Classes\\txtfile\\shell\\open\\command", (String) null, "\"Z:\\opt\\apps\\AkelPad.exe\" \"%1\"");
 
             registryEditor.setStringValue("Software\\Classes\\dllfile\\DefaultIcon", null, "shell32.dll,-154");
             registryEditor.setStringValue("Software\\Classes\\lnkfile\\DefaultIcon", null, "shell32.dll,-30");
@@ -98,7 +99,7 @@ public abstract class WineUtils {
             }
         }
 
-        final String[] direct3dLibs = {"d3d8", "d3d9", "d3d10", "d3d10_1", "d3d10core", "d3d11", "d3d12", "d3d12core", "ddraw", "dxgi", "wined3d"};
+        final String[] direct3dLibs = {"d3d8", "d3d9", "d3d10", "d3d10_1", "d3d10core", "d3d11", "d3d12", "d3d12core", "ddraw", "dxgi", "wined3d", "d2d1", "winhttp", "version"};
         final String[] inputLibs = {"dinput", "dinput8", "xinput1_1", "xinput1_2", "xinput1_3", "xinput1_4", "xinput9_1_0", "xinputuap"};
         final String dllOverridesKey = "Software\\Wine\\DllOverrides";
 
@@ -127,6 +128,7 @@ public abstract class WineUtils {
             registryEditor.setStringValue("Software\\Winlator\\WFM\\ContextMenu\\7-Zip", "Extract to Folder", "Z:\\opt\\apps\\7-Zip\\7zG.exe x \"%FILE%\" -r -o\"%DIR%\\%BASENAME%\" -y");
             registryEditor.setStringValue("Software\\Wine\\AddonsURL", null, "http://cdn4.52emu.cn/wlt/v10/wine_addons/");
             registryEditor.setStringValue("Software\\Wine\\Drivers", "Graphics", "x11");
+            registryEditor.setStringValue("Software\\Akelsoft\\AkelPad\\Options", "LanguageModule", "Chinese (Simplified).dll");
         }
     }
 
