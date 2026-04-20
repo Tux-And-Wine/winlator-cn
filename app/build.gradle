@@ -34,6 +34,28 @@ android {
             path 'src/main/cpp/CMakeLists.txt'
         }
     }
+
+    packagingOptions {
+        pickFirst 'lib/arm64-v8a/libFLAC.so'
+        pickFirst 'lib/arm64-v8a/libc++_shared.so'
+        pickFirst 'lib/arm64-v8a/libfluidsynth.so'
+        pickFirst 'lib/arm64-v8a/libfluidsynth-assetloader.so'
+        pickFirst 'lib/arm64-v8a/libgio-2.0.so'
+        pickFirst 'lib/arm64-v8a/libglib-2.0.so'
+        pickFirst 'lib/arm64-v8a/libgmodule-2.0.so'
+        pickFirst 'lib/arm64-v8a/libgobject-2.0.so'
+        pickFirst 'lib/arm64-v8a/libgthread-2.0.so'
+        pickFirst 'lib/arm64-v8a/libinstpatch-1.0.so'
+        pickFirst 'lib/arm64-v8a/liboboe.so'
+        pickFirst 'lib/arm64-v8a/libogg.so'
+        pickFirst 'lib/arm64-v8a/libopus.so'
+        pickFirst 'lib/arm64-v8a/libpcre.so'
+        pickFirst 'lib/arm64-v8a/libpcreposix.so'
+        pickFirst 'lib/arm64-v8a/libsndfile.so'
+        pickFirst 'lib/arm64-v8a/libvorbis.so'
+        pickFirst 'lib/arm64-v8a/libvorbisenc.so'
+        pickFirst 'lib/arm64-v8a/libvorbisfile.so'
+    }
 }
 
 dependencies {
