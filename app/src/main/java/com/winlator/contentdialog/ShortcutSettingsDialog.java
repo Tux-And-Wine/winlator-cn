@@ -85,7 +85,7 @@ public class ShortcutSettingsDialog extends ContentDialog {
         Box64PresetManager.loadSpinner(sBox64Preset, shortcut.getExtra("box64Preset", shortcut.container.getBox64Preset()));
 
         final Spinner sControlsProfile = findViewById(R.id.SControlsProfile);
-        loadControlsProfileSpinner(sControlsProfile, shortcut.getExtra("controlsProfile", "0"));
+        loadControlsProfileSpinner(sControlsProfile, shortcut.getExtra("controlsProfile", shortcut.container.getExtra("controlsProfile", "0")));
 
         final Spinner sDInputMapperType = findViewById(R.id.SDInputMapperType);
         sDInputMapperType.setSelection(Byte.parseByte(shortcut.getExtra("dinputMapperType", String.valueOf(GamepadHandler.DINPUT_MAPPER_TYPE_XINPUT))));

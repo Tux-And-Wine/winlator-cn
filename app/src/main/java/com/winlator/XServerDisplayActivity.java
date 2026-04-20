@@ -666,6 +666,13 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
                 if (profile != null) showInputControls(profile);
             }
         }
+        else {
+            String controlsProfile = container.getExtra("controlsProfile", "");
+            if (!controlsProfile.isEmpty()) {
+                ControlsProfile profile = inputControlsManager.getProfile(Integer.parseInt(controlsProfile));
+                if (profile != null) showInputControls(profile);
+            }
+        }
 
         if (MainActivity.DEBUG_MODE) rootView.addView(AppUtils.createDebugMsgTextView(this));
         AppUtils.observeSoftKeyboardVisibility(drawerLayout, renderer::setScreenOffsetYRelativeToCursor);
