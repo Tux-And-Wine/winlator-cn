@@ -59,6 +59,8 @@ import com.winlator.core.WineInstaller;
 import com.winlator.core.WineRegistryEditor;
 import com.winlator.core.WineThemeManager;
 import com.winlator.core.WineUtils;
+import com.winlator.fex.FEXPreset;
+import com.winlator.fex.FEXPresetManager;
 import com.winlator.widget.CPUListView;
 import com.winlator.widget.ColorPickerView;
 import com.winlator.widget.EnvVarsView;
@@ -137,6 +139,24 @@ public class ContainerDetailFragment extends Fragment {
 
         final ArrayList<WineInfo> wineInfos = WineInstaller.getInstalledWineInfos(context);
         final Spinner sWineVersion = view.findViewById(R.id.SWineVersion);
+        final View flBox64 = view.findViewById(R.id.FLBox64);
+        final View flFEX = view.findViewById(R.id.FLFEX);
+        
+        // 根据 Wine 架构切换 Box64/FEX 显示
+        sWineVersion.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View v, int position, long id) {
+                String wineVersionIdentifier = sWineVersion.getSelectedItem().toString();
+                WineInfo wineInfo = WineInfo.fromIdentifier(context, wineVersionIdentifier);
+                boolean isArm64EC = wineInfo != null && wineInfo.getArch() != null && wineInfo.getArch().equals("arm64ec");
+                flBox64.setVisibility(isArm64EC ? View.GONE : View.VISIBLE);
+                flFEX.setVisibility(isArm64EC ? View.VISIBLE : View.GONE);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
+        
         // 总是加载 Wine 版本选择器，即使没有本地安装的 Wine
         loadWineVersionSpinner(view, sWineVersion, wineInfos);
 
@@ -153,7 +173,8 @@ public class ContainerDetailFragment extends Fragment {
         String selectedDXWrapper = isEditMode() ? container.getDXWrapper() : Container.DEFAULT_DXWRAPPER;
         DXWrapperPicker dxwrapperPicker = new DXWrapperPicker(view.findViewById(R.id.LLDXWrapper), graphicsDriverPicker, selectedDXWrapper, oldDXWrapperConfig);
 
-        view.findViewById(R.id.BTHelpDXWrapper).setOnClickListener((v) -> AppUtils.showHelpBox(context, v, R.string.dxwrapper_help_content));
+        // BTHelpDXWrapper 在当前项目中不存在，暂时注释
+        // view.findViewById(R.id.BTHelpDXWrapper).setOnClickListener((v) -> AppUtils.showHelpBox(context, v, R.string.dxwrapper_help_content));
 
         Spinner sAudioDriver = view.findViewById(R.id.SAudioDriver);
         AppUtils.setSpinnerSelectionFromIdentifier(sAudioDriver, isEditMode() ? container.getAudioDriver() : Container.DEFAULT_AUDIO_DRIVER);
@@ -178,6 +199,28 @@ public class ContainerDetailFragment extends Fragment {
 
         final Spinner sBox64Preset = view.findViewById(R.id.SBox64Preset);
         Box64PresetManager.loadSpinner(sBox64Preset, isEditMode() ? container.getBox64Preset() : preferences.getString("box64_preset", Box64Preset.DEFAULT));
+
+        // FEX 相关 UI 初始化
+        ContentsManager contentsManager = new ContentsManager(context);
+        contentsManager.syncContents();
+        
+        final Spinner sFEXVersion = view.findViewById(R.id.SFEXVersion);
+        updateFEXVersionSpinner(context, contentsManager, sFEXVersion);
+        if (isEditMode()) {
+            AppUtils.setSpinnerSelectionFromValue(sFEXVersion, container.getFexVersion());
+        } else {
+            AppUtils.setSpinnerSelectionFromValue(sFEXVersion, preferences.getString("fex_version", "FEX-2603"));
+        }
+
+        final Spinner sFEXPresetCustom = view.findViewById(R.id.SFEXPresetCustom);
+        FEXPresetManager.loadSpinner(sFEXPresetCustom, isEditMode() ? container.getFexPresetCustom() : preferences.getString("fex_preset", FEXPreset.COMPATIBILITY));
+
+        final Spinner sFEXPreset = view.findViewById(R.id.SFEXPreset);
+        if (isEditMode()) {
+            sFEXPreset.setSelection(container.getFexPreset());
+        } else {
+            sFEXPreset.setSelection(0);
+        }
 
         final CPUListView cpuListView = view.findViewById(R.id.CPUListView);
         final CPUListView cpuListViewWoW64 = view.findViewById(R.id.CPUListViewWoW64);
@@ -213,6 +256,9 @@ public class ContainerDetailFragment extends Fragment {
                 byte startupSelection = (byte)sStartupSelection.getSelectedItemPosition();
                 String box64Preset = Box64PresetManager.getSpinnerSelectedId(sBox64Preset);
                 String box64VersionSelected = StringUtils.parseIdentifier(sBox64Version.getSelectedItem());
+                String fexVersion = sFEXVersion.getSelectedItem().toString();
+                int fexPreset = sFEXPreset.getSelectedItemPosition();
+                String fexPresetCustom = FEXPresetManager.getSpinnerSelectedId(sFEXPresetCustom);
                 String desktopTheme = getDesktopTheme(view);
 
                 if (isEditMode()) {
@@ -235,6 +281,9 @@ public class ContainerDetailFragment extends Fragment {
                     container.setStartupSelection(startupSelection);
                     container.setBox64Preset(box64Preset);
                     container.setBox64Version(box64VersionSelected);
+                    container.setFexVersion(fexVersion);
+                    container.setFexPreset(fexPreset);
+                    container.setFexPresetCustom(fexPresetCustom);
                     container.setDesktopTheme(desktopTheme);
                     container.saveData();
 
@@ -266,6 +315,9 @@ public class ContainerDetailFragment extends Fragment {
                     data.put("startupSelection", startupSelection);
                     data.put("box64Preset", box64Preset);
                     data.put("box64Version", box64VersionSelected);
+                    data.put("fexVersion", fexVersion);
+                    data.put("fexPreset", fexPreset);
+                    data.put("fexPresetCustom", fexPresetCustom);
                     data.put("desktopTheme", desktopTheme);
 
                     // 保存 Wine 版本
@@ -616,11 +668,21 @@ public class ContainerDetailFragment extends Fragment {
         
         sWineVersion.setAdapter(new ArrayAdapter<>(context, android.R.layout.simple_spinner_dropdown_item, wineVersions));
         
-        // 设置默认版本为 10.10
+        // 设置默认版本为 x86_64 Wine
         if (!isEditMode()) {
-            AppUtils.setSpinnerSelectionFromValue(sWineVersion, "10.10");
+            AppUtils.setSpinnerSelectionFromValue(sWineVersion, WineInfo.WINE_X86_64.identifier());
         } else {
             AppUtils.setSpinnerSelectionFromValue(sWineVersion, container.getWineVersion());
         }
+    }
+
+    public static void updateFEXVersionSpinner(Context context, ContentsManager manager, Spinner spinner) {
+        List<String> itemList = new ArrayList<>();
+        itemList.add("FEX-2512");
+        itemList.add("FEX-2601");
+        itemList.add("FEX-2603");
+        for (ContentProfile profile : manager.getProfiles(ContentProfile.ContentType.CONTENT_TYPE_FEX))
+            itemList.add(ContentsManager.getEntryName(profile));
+        spinner.setAdapter(new ArrayAdapter<>(context, android.R.layout.simple_spinner_dropdown_item, itemList));
     }
 }

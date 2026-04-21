@@ -165,21 +165,6 @@
                 android:gravity="center_vertical" />
 
             <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/dxwrapper" />
-
-                <ImageView
-                    android:id="@+id/BTHelpDXWrapper"
-                    style="@style/HelpButton" />
-            </LinearLayout>
-
-            <LinearLayout
                 android:id="@+id/LLDXWrapper"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -505,6 +490,7 @@
                 android:visibility="gone">
 
                 <FrameLayout
+                    android:id="@+id/FLBox64"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp">
@@ -559,6 +545,52 @@
                     <TextView
                         style="@style/FieldSetLabel"
                         android:text="@string/box64" />
+                </FrameLayout>
+
+                <!-- FEX UI for arm64ec Wine -->
+                <FrameLayout
+                    android:id="@+id/FLFEX"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:visibility="gone">
+
+                    <LinearLayout style="@style/FieldSet">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/fex_version" />
+
+                        <Spinner
+                            style="@style/ComboBox"
+                            android:id="@+id/SFEXVersion"
+                            android:layout_width="match_parent" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/fex_preset" />
+
+                        <Spinner
+                            style="@style/ComboBox"
+                            android:id="@+id/SFEXPresetCustom"
+                            android:layout_width="match_parent" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="32位模拟" />
+
+                        <Spinner
+                            style="@style/ComboBox"
+                            android:id="@+id/SFEXPreset"
+                            android:layout_width="match_parent"
+                            android:entries="@array/fex_preset_entries" />
+                    </LinearLayout>
+
+                    <TextView
+                        style="@style/FieldSetLabel"
+                        android:text="@string/fex" />
                 </FrameLayout>
 
                 <FrameLayout

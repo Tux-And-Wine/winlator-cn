@@ -193,7 +193,10 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
             String wineVersion = container.getWineVersion();
             wineInfo = WineInfo.fromIdentifier(this, wineVersion);
 
-            if (wineInfo != WineInfo.MAIN_WINE_INFO) rootFS.setWinePath(wineInfo.path);
+            // 始终设置 winePath，包括默认 Wine
+            if (wineInfo != null && wineInfo.path != null) {
+                rootFS.setWinePath(wineInfo.path);
+            }
 
             String shortcutPath = getIntent().getStringExtra("shortcut_path");
             if (shortcutPath != null && !shortcutPath.isEmpty()) shortcut = new Shortcut(container, new File(shortcutPath));
@@ -554,7 +557,9 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
             if (container.getStartupSelection() == Container.STARTUP_SELECTION_AGGRESSIVE) winHandler.killProcess("services.exe");
 
             String desktopName = shortcut != null || getIntent().hasExtra("exec_path") ? "nogui" : "shell";
-            String guestExecutable = "wine explorer /desktop="+desktopName+","+xServer.screenInfo+" "+getWineStartCommand();
+            // 根据 Wine 架构选择正确的可执行文件（x86_64 用 wine64，arm64ec 用 wine）
+            String wineExecutable = wineInfo != null ? wineInfo.getExecutable(this, true) : "wine64";
+            String guestExecutable = wineExecutable + " explorer /desktop="+desktopName+","+xServer.screenInfo+" "+getWineStartCommand();
             guestProgramLauncherComponent.setGuestExecutable(guestExecutable);
 
             envVars.putAll(container.getEnvVars());
@@ -563,6 +568,7 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
 
             guestProgramLauncherComponent.setBox64Preset(shortcut != null ? shortcut.getExtra("box64Preset", container.getBox64Preset()) : container.getBox64Preset());
             guestProgramLauncherComponent.setBox64Version(container.getBox64Version());
+            guestProgramLauncherComponent.setWineVersion(container.getWineVersion());
         }
 
         environment = new XEnvironment(this, rootFS);
@@ -967,7 +973,16 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
     private void restoreBuiltinDllFiles(final String... dlls) {
         File rootDir = rootFS.getRootDir();
         File wineDir = new File(rootDir, rootFS.getWinePath());
-        File wineSystem32Dir = new File(wineDir, "/lib/wine/x86_64-windows");
+        
+        // 根据 Wine 架构选择正确的目录
+        String nativeWindowsDir;
+        if (wineInfo != null && wineInfo.path != null && wineInfo.path.contains("arm64ec")) {
+            nativeWindowsDir = "aarch64-windows";
+        } else {
+            nativeWindowsDir = "x86_64-windows";
+        }
+        
+        File wineSystem32Dir = new File(wineDir, "/lib/wine/" + nativeWindowsDir);
         File wineSysWoW64Dir = new File(wineDir, "/lib/wine/i386-windows");
         File containerSystem32Dir = new File(rootDir, RootFS.WINEPREFIX+"/drive_c/windows/system32");
         File containerSysWoW64Dir = new File(rootDir, RootFS.WINEPREFIX+"/drive_c/windows/syswow64");;

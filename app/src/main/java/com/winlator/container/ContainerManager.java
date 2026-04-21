@@ -107,8 +107,7 @@ public class ContainerManager {
             container.setRootDir(containerDir);
             container.loadData(data);
 
-            boolean isMainWineVersion = !data.has("wineVersion") || WineInfo.isMainWineVersion(data.getString("wineVersion"));
-            if (!isMainWineVersion) container.setWineVersion(data.getString("wineVersion"));
+            // wineVersion 已经在 loadData 中正确设置，不需要额外处理
 
             if (!extractContainerPatternFile(container.getWineVersion(), containerDir)) {
                 FileUtils.delete(containerDir);
@@ -236,8 +235,16 @@ public class ContainerManager {
         return null;
     }
 
-    private void copyCommonDlls(String srcName, String dstName, JSONObject commonDlls, File containerDir) throws JSONException {
-        File srcDir = new File(RootFS.find(context).getRootDir(), "/opt/wine/lib/wine/"+srcName);
+    private void copyCommonDlls(String winePath, String srcName, String dstName, JSONObject commonDlls, File containerDir) throws JSONException {
+        File rootDir = RootFS.find(context).getRootDir();
+        // winePath 可能是绝对路径（如 /opt/x86_64-wine）或相对路径
+        File wineDir;
+        if (winePath.startsWith("/")) {
+            wineDir = new File(rootDir, winePath.substring(1));
+        } else {
+            wineDir = new File(rootDir, winePath);
+        }
+        File srcDir = new File(wineDir, "lib/wine/" + srcName);
         JSONArray dlnames = commonDlls.getJSONArray(dstName);
 
         for (int i = 0; i < dlnames.length(); i++) {
@@ -249,13 +256,21 @@ public class ContainerManager {
 
     private boolean extractContainerPatternFile(String wineVersion, File containerDir) {
         if (WineInfo.isMainWineVersion(wineVersion)) {
-            boolean result = TarCompressorUtils.extract(TarCompressorUtils.Type.ZSTD, context, "container_pattern.tzst", containerDir);
+            WineInfo wineInfo = WineInfo.fromIdentifier(context, wineVersion);
+            String arch = wineInfo.getArch();
+            String patternFile = arch.equals("arm64ec") ? "arm64ec-container_pattern.tzst" : "x86_64-container_pattern.tzst";
+            
+            boolean result = TarCompressorUtils.extract(TarCompressorUtils.Type.ZSTD, context, patternFile, containerDir);
 
             if (result) {
                 try {
-                    JSONObject commonDlls = new JSONObject(FileUtils.readString(context, "common_dlls.json"));
-                    copyCommonDlls("x86_64-windows", "system32", commonDlls, containerDir);
-                    copyCommonDlls("i386-windows", "syswow64", commonDlls, containerDir);
+                    String commonDllsFile = arch.equals("arm64ec") ? "arm64ec-common_dlls.json" : "x86_64-common_dlls.json";
+                    JSONObject commonDlls = new JSONObject(FileUtils.readString(context, commonDllsFile));
+                    
+                    String nativeWindowsDir = arch.equals("arm64ec") ? "aarch64-windows" : "x86_64-windows";
+                    
+                    copyCommonDlls(wineInfo.path, nativeWindowsDir, "system32", commonDlls, containerDir);
+                    copyCommonDlls(wineInfo.path, "i386-windows", "syswow64", commonDlls, containerDir);
                 }
                 catch (JSONException e) {
                     return false;

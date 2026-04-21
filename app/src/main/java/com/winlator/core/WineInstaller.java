@@ -153,7 +153,9 @@ public abstract class WineInstaller {
             if (matcher.find()) {
                 String version = matcher.group(1);
                 String subversion = matcher.groupCount() >= 2 ? matcher.group(2) : null;
-                wineInfoRef.set(new WineInfo(version, subversion, winePath));
+                // 从路径中判断架构
+                String arch = winePath.contains("arm64ec") ? "arm64ec" : "x86_64";
+                wineInfoRef.set(new WineInfo(version, subversion, arch, winePath));
             }
         };
 
@@ -176,7 +178,8 @@ public abstract class WineInstaller {
 
     public static ArrayList<WineInfo> getInstalledWineInfos(Context context) {
         ArrayList<WineInfo> wineInfos = new ArrayList<>();
-        wineInfos.add(WineInfo.MAIN_WINE_INFO);
+        wineInfos.add(WineInfo.WINE_X86_64);
+        wineInfos.add(WineInfo.WINE_ARM64EC);
         File installedWineDir = RootFS.find(context).getInstalledWineDir();
 
         File[] files = installedWineDir.listFiles();

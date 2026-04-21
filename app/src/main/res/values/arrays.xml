@@ -83,6 +83,10 @@
         <item>Standard</item>
         <item>XInput</item>
     </string-array>
+    <string-array name="fex_preset_entries">
+        <item>libwow64fex.dll</item>
+        <item>wowbox64.dll</item>
+    </string-array>
     <string-array name="desktop_background_type_entries">
         <item>@string/image</item>
         <item>@string/solid_color</item>

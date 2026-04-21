@@ -141,9 +141,12 @@
     <string name="estimated_used_space">Estimated Used Space</string>
     <string name="advanced">Advanced</string>
     <string name="box64" translatable="false">Box64</string>
+    <string name="fex" translatable="false">FEX</string>
     <string name="system">System</string>
     <string name="box64_preset">Box64 Preset</string>
     <string name="box64_version">Box64 Version</string>
+    <string name="fex_preset">FEX Preset</string>
+    <string name="fex_version">FEX Version</string>
     <string name="letter">Letter</string>
     <string name="target_path">Target Path</string>
     <string name="width">Width</string>
@@ -170,6 +173,7 @@
     <string name="installed_version">Installed Version</string>
     <string name="unable_to_download_file">Unable to download file</string>
     <string name="stability">Stability</string>
+    <string name="compatibility">Compatibility</string>
     <string name="conservative">Conservative</string>
     <string name="intermediate">Intermediate</string>
     <string name="performance">Performance</string>

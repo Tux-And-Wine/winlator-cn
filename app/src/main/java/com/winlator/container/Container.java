@@ -45,7 +45,7 @@ public class Container {
     private String wincomponents = DEFAULT_WINCOMPONENTS;
     private String audioDriver = DEFAULT_AUDIO_DRIVER;
     private String drives = DEFAULT_DRIVES;
-    private String wineVersion = WineInfo.MAIN_WINE_INFO.identifier();
+    private String wineVersion = WineInfo.MAIN_WINE_VERSION.identifier();
     private byte hudMode = (byte)FrameRating.Mode.DISABLED.ordinal();
     private byte startupSelection = STARTUP_SELECTION_ESSENTIAL;
     private String cpuList;
@@ -53,6 +53,9 @@ public class Container {
     private String desktopTheme = WineThemeManager.DEFAULT_DESKTOP_THEME;
     private String box64Preset = Box64Preset.DEFAULT;
     private String box64Version = DefaultVersion.BOX64;
+    private String fexVersion = "FEX-2603";
+    private int fexPreset = 0;
+    private String fexPresetCustom = com.winlator.fex.FEXPreset.COMPATIBILITY;
     private File rootDir;
     private JSONObject extraData;
 
@@ -221,6 +224,30 @@ public class Container {
         this.box64Version = box64Version;
     }
 
+    public String getFexVersion() {
+        return fexVersion;
+    }
+
+    public void setFexVersion(String fexVersion) {
+        this.fexVersion = fexVersion;
+    }
+
+    public int getFexPreset() {
+        return fexPreset;
+    }
+
+    public void setFexPreset(int fexPreset) {
+        this.fexPreset = fexPreset;
+    }
+
+    public String getFexPresetCustom() {
+        return fexPresetCustom;
+    }
+
+    public void setFexPresetCustom(String fexPresetCustom) {
+        this.fexPresetCustom = fexPresetCustom;
+    }
+
     public File getRootDir() {
         return rootDir;
     }
@@ -335,17 +362,24 @@ public class Container {
             data.put("startupSelection", startupSelection);
             data.put("box64Preset", box64Preset);
             data.put("box64Version", box64Version);
+            data.put("fexVersion", fexVersion);
+            data.put("fexPreset", fexPreset);
+            data.put("fexPresetCustom", fexPresetCustom);
             data.put("desktopTheme", desktopTheme);
             data.put("extraData", extraData);
 
-            if (!WineInfo.isMainWineVersion(wineVersion)) data.put("wineVersion", wineVersion);
+            // 始终保存 wineVersion，包括默认 Wine（x86_64 和 arm64ec）
+            if (wineVersion != null && !wineVersion.isEmpty()) {
+                data.put("wineVersion", wineVersion);
+            }
+            
             FileUtils.writeString(getConfigFile(), data.toString());
         }
         catch (JSONException e) {}
     }
 
     public void loadData(JSONObject data) throws JSONException {
-        wineVersion = WineInfo.MAIN_WINE_INFO.identifier();
+        wineVersion = WineInfo.MAIN_WINE_VERSION.identifier();
         dxwrapperConfig = "";
         graphicsDriverConfig = "";
         audioDriverConfig = "";
@@ -420,6 +454,15 @@ public class Container {
                     break;
                 case "box64Version" :
                     setBox64Version(data.getString(key));
+                    break;
+                case "fexVersion" :
+                    setFexVersion(data.getString(key));
+                    break;
+                case "fexPreset" :
+                    setFexPreset(data.getInt(key));
+                    break;
+                case "fexPresetCustom" :
+                    setFexPresetCustom(data.getString(key));
                     break;
                 case "audioDriver" :
                     setAudioDriver(data.getString(key));

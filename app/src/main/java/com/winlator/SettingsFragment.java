@@ -323,7 +323,7 @@ public class SettingsFragment extends Fragment {
         view.findViewById(R.id.BTInstallWine).setOnClickListener((v) -> selectWineFileForInstall());
         view.findViewById(R.id.BTRemoveWine).setOnClickListener((v) -> {
             WineInfo wineInfo = wineInfos.get(sWineVersion.getSelectedItemPosition());
-            if (wineInfo != WineInfo.MAIN_WINE_INFO) {
+            if (wineInfo != WineInfo.MAIN_WINE_VERSION) {
                 ContentDialog.confirm(getContext(), R.string.do_you_want_to_remove_this_wine_version, () -> {
                     removeInstalledWine(wineInfo, () -> loadWineVersionSpinner(view, sWineVersion));
                 });

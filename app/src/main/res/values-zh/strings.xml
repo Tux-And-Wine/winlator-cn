@@ -169,7 +169,8 @@
     <string name="installed_version">已安装的版本</string>
     <string name="unable_to_download_file">无法下载文件</string>
     <string name="stability">稳定模式</string>
-    <string name="conservative">兼容模式</string>
+    <string name="compatibility">兼容模式</string>
+    <string name="conservative">保守模式</string>
     <string name="intermediate">均衡模式</string>
     <string name="performance">性能模式</string>
     <string name="preset">预设</string>
