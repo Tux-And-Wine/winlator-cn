@@ -182,10 +182,8 @@ public class TouchpadViewV3 extends View implements View.OnCapturedPointerListen
                     isLongDrag = false;
                     initialPointerX = xServer.pointer.getX();
                     initialPointerY = xServer.pointer.getY();
-                    if (Math.hypot(fingers[0].x - lastTouchedPosX, fingers[0].y - lastTouchedPosY) * resolutionScale > EFFECTIVE_TOUCH_DISTANCE) {
-                        lastTouchedPosX = fingers[0].x;
-                        lastTouchedPosY = fingers[0].y;
-                    }
+                    lastTouchedPosX = fingers[0].x;
+                    lastTouchedPosY = fingers[0].y;
                 }
                 // V3: 按下时立即触发按键
                 handleFingerDown(fingers[pointerId]);

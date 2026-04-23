@@ -178,10 +178,8 @@ public class TouchpadViewV2 extends View implements View.OnCapturedPointerListen
                     isLongDrag = false;
                     initialPointerX = xServer.pointer.getX();
                     initialPointerY = xServer.pointer.getY();
-                    if (Math.hypot(fingers[0].x - lastTouchedPosX, fingers[0].y - lastTouchedPosY) * resolutionScale > EFFECTIVE_TOUCH_DISTANCE) {
-                        lastTouchedPosX = fingers[0].x;
-                        lastTouchedPosY = fingers[0].y;
-                    }
+                    lastTouchedPosX = fingers[0].x;
+                    lastTouchedPosY = fingers[0].y;
                 }
                 break;
             case MotionEvent.ACTION_MOVE:
