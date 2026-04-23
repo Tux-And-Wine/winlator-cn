@@ -174,5 +174,6 @@
     <string-array name="touchpad_mode_entries">
         <item>CP1 Direct touch</item>
         <item>CP2 Direct touch（RA2)</item>
+        <item>CP3 Press on down</item>
     </string-array>
 </resources>

@@ -11,6 +11,7 @@ import com.winlator.xserver.XServer;
 public class TouchpadView extends FrameLayout {
     public static final byte TOUCHPAD_MODE_V1 = 0;
     public static final byte TOUCHPAD_MODE_V2 = 1;
+    public static final byte TOUCHPAD_MODE_V3 = 2;
     public static final byte MAX_TAP_TRAVEL_DISTANCE = 10;
     public static final short MAX_TAP_MILLISECONDS = 200;
     public static final float CURSOR_ACCELERATION = 1.5f;
@@ -42,6 +43,8 @@ public class TouchpadView extends FrameLayout {
 
         if (touchpadMode == TOUCHPAD_MODE_V2) {
             impl = new TouchpadViewV2(context, xServer, capturePointerOnExternalMouse);
+        } else if (touchpadMode == TOUCHPAD_MODE_V3) {
+            impl = new TouchpadViewV3(context, xServer, capturePointerOnExternalMouse);
         } else {
             impl = new TouchpadViewV1(context, xServer, capturePointerOnExternalMouse);
         }
@@ -67,6 +70,14 @@ public class TouchpadView extends FrameLayout {
             v2.setMoveCursorToTouchpoint(moveCursorToTouchpoint);
             v2.setFourFingersTapCallback(fourFingersTapCallback);
             v2.setEnabled(isEnabled());
+        } else if (impl instanceof TouchpadViewV3) {
+            TouchpadViewV3 v3 = (TouchpadViewV3) impl;
+            v3.setSensitivity(sensitivity);
+            v3.setPointerButtonLeftEnabled(pointerButtonLeftEnabled);
+            v3.setPointerButtonRightEnabled(pointerButtonRightEnabled);
+            v3.setMoveCursorToTouchpoint(moveCursorToTouchpoint);
+            v3.setFourFingersTapCallback(fourFingersTapCallback);
+            v3.setEnabled(isEnabled());
         }
     }
 
@@ -86,6 +97,8 @@ public class TouchpadView extends FrameLayout {
             ((TouchpadViewV1) impl).toggleFullscreen();
         } else if (impl instanceof TouchpadViewV2) {
             ((TouchpadViewV2) impl).toggleFullscreen();
+        } else if (impl instanceof TouchpadViewV3) {
+            ((TouchpadViewV3) impl).toggleFullscreen();
         }
     }
 
@@ -95,6 +108,8 @@ public class TouchpadView extends FrameLayout {
             ((TouchpadViewV1) impl).setSensitivity(sensitivity);
         } else if (impl instanceof TouchpadViewV2) {
             ((TouchpadViewV2) impl).setSensitivity(sensitivity);
+        } else if (impl instanceof TouchpadViewV3) {
+            ((TouchpadViewV3) impl).setSensitivity(sensitivity);
         }
     }
 
@@ -108,6 +123,8 @@ public class TouchpadView extends FrameLayout {
             ((TouchpadViewV1) impl).setPointerButtonLeftEnabled(pointerButtonLeftEnabled);
         } else if (impl instanceof TouchpadViewV2) {
             ((TouchpadViewV2) impl).setPointerButtonLeftEnabled(pointerButtonLeftEnabled);
+        } else if (impl instanceof TouchpadViewV3) {
+            ((TouchpadViewV3) impl).setPointerButtonLeftEnabled(pointerButtonLeftEnabled);
         }
     }
 
@@ -121,6 +138,8 @@ public class TouchpadView extends FrameLayout {
             ((TouchpadViewV1) impl).setPointerButtonRightEnabled(pointerButtonRightEnabled);
         } else if (impl instanceof TouchpadViewV2) {
             ((TouchpadViewV2) impl).setPointerButtonRightEnabled(pointerButtonRightEnabled);
+        } else if (impl instanceof TouchpadViewV3) {
+            ((TouchpadViewV3) impl).setPointerButtonRightEnabled(pointerButtonRightEnabled);
         }
     }
 
@@ -130,6 +149,8 @@ public class TouchpadView extends FrameLayout {
             ((TouchpadViewV1) impl).setFourFingersTapCallback(fourFingersTapCallback);
         } else if (impl instanceof TouchpadViewV2) {
             ((TouchpadViewV2) impl).setFourFingersTapCallback(fourFingersTapCallback);
+        } else if (impl instanceof TouchpadViewV3) {
+            ((TouchpadViewV3) impl).setFourFingersTapCallback(fourFingersTapCallback);
         }
     }
 
@@ -143,6 +164,8 @@ public class TouchpadView extends FrameLayout {
             ((TouchpadViewV1) impl).setMoveCursorToTouchpoint(moveCursorToTouchpoint);
         } else if (impl instanceof TouchpadViewV2) {
             ((TouchpadViewV2) impl).setMoveCursorToTouchpoint(moveCursorToTouchpoint);
+        } else if (impl instanceof TouchpadViewV3) {
+            ((TouchpadViewV3) impl).setMoveCursorToTouchpoint(moveCursorToTouchpoint);
         }
     }
 
@@ -161,6 +184,8 @@ public class TouchpadView extends FrameLayout {
             return ((TouchpadViewV1) impl).onExternalMouseEvent(event);
         } else if (impl instanceof TouchpadViewV2) {
             return ((TouchpadViewV2) impl).onExternalMouseEvent(event);
+        } else if (impl instanceof TouchpadViewV3) {
+            return ((TouchpadViewV3) impl).onExternalMouseEvent(event);
         }
         return false;
     }
@@ -170,6 +195,8 @@ public class TouchpadView extends FrameLayout {
             return ((TouchpadViewV1) impl).computeDeltaPoint(lastX, lastY, x, y);
         } else if (impl instanceof TouchpadViewV2) {
             return ((TouchpadViewV2) impl).computeDeltaPoint(lastX, lastY, x, y);
+        } else if (impl instanceof TouchpadViewV3) {
+            return ((TouchpadViewV3) impl).computeDeltaPoint(lastX, lastY, x, y);
         }
         return new float[]{0, 0};
     }
@@ -179,6 +206,8 @@ public class TouchpadView extends FrameLayout {
             ((TouchpadViewV1) impl).mouseMove(x, y, action);
         } else if (impl instanceof TouchpadViewV2) {
             ((TouchpadViewV2) impl).mouseMove(x, y, action);
+        } else if (impl instanceof TouchpadViewV3) {
+            ((TouchpadViewV3) impl).mouseMove(x, y, action);
         }
     }
 
@@ -198,6 +227,8 @@ public class TouchpadView extends FrameLayout {
             ((TouchpadViewV1) impl).setSwapMouseButtons();
         } else if (impl instanceof TouchpadViewV2) {
             ((TouchpadViewV2) impl).setSwapMouseButtons();
+        } else if (impl instanceof TouchpadViewV3) {
+            ((TouchpadViewV3) impl).setSwapMouseButtons();
         }
     }
 
