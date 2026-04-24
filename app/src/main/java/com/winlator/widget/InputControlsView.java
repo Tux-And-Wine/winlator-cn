@@ -249,7 +249,7 @@ public class InputControlsView extends View {
     public void performTouchHapticFeedback() {
         if (touchHapticFeedbackEnabled && vibrator != null) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                vibrator.vibrate(VibrationEffect.createOneShot(30, 200), new VibrationAttributes.Builder().setUsage(VibrationAttributes.USAGE_PHYSICAL_EMULATION).build());
+                vibrator.vibrate(VibrationEffect.createOneShot(30, 200), new VibrationAttributes.Builder().setUsage(VibrationAttributes.USAGE_MEDIA).build());
             } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 vibrator.vibrate(VibrationEffect.createOneShot(30, 200));
             } else {
