@@ -224,6 +224,10 @@ public class TouchpadViewV3 extends View implements View.OnCapturedPointerListen
                 isShortDrag = false;
                 isLongDrag = false;
                 scrollAccumY = 0;
+                if (fingerPointerButtonLeft != null && xServer.pointer.isButtonPressed(Pointer.Button.BUTTON_LEFT))
+                    xServer.injectPointerButtonRelease(Pointer.Button.BUTTON_LEFT);
+                if (fingerPointerButtonRight != null && xServer.pointer.isButtonPressed(Pointer.Button.BUTTON_RIGHT))
+                    xServer.injectPointerButtonRelease(Pointer.Button.BUTTON_RIGHT);
                 fingerPointerButtonLeft = null;
                 fingerPointerButtonRight = null;
                 leftPressedOnDown = false;
