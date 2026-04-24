@@ -808,7 +808,7 @@ public class ControlElement {
     }
 
     private void performHapticFeedback() {
-        if (inputControlsView.isHapticFeedbackEnabled()) {
+        if (inputControlsView.isTouchHapticFeedbackEnabled()) {
             inputControlsView.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
         }
     }

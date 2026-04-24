@@ -61,14 +61,14 @@ public class InputControlsView extends View {
     private Timer mouseMoveTimer;
     private final PointF mouseMoveOffset = new PointF();
     private boolean showTouchscreenControls = true;
-    private boolean hapticFeedbackEnabled = true;
+    private boolean touchHapticFeedbackEnabled = true;
 
     public InputControlsView(Context context) {
         super(context);
         setClickable(true);
         setFocusable(true);
         setFocusableInTouchMode(true);
-        setHapticFeedbackEnabled(true);
+        super.setHapticFeedbackEnabled(true);
         setBackgroundColor(0x00000000);
         setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
     }
@@ -226,12 +226,12 @@ public class InputControlsView extends View {
         this.showTouchscreenControls = showTouchscreenControls;
     }
 
-    public boolean isHapticFeedbackEnabled() {
-        return hapticFeedbackEnabled;
+    public boolean isTouchHapticFeedbackEnabled() {
+        return touchHapticFeedbackEnabled;
     }
 
-    public void setHapticFeedbackEnabled(boolean hapticFeedbackEnabled) {
-        this.hapticFeedbackEnabled = hapticFeedbackEnabled;
+    public void setTouchHapticFeedbackEnabled(boolean touchHapticFeedbackEnabled) {
+        this.touchHapticFeedbackEnabled = touchHapticFeedbackEnabled;
     }
 
     private synchronized ControlElement intersectElement(float x, float y) {
