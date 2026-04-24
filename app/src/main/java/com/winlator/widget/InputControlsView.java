@@ -245,11 +245,13 @@ public class InputControlsView extends View {
     }
 
     public void performTouchHapticFeedback() {
-        if (touchHapticFeedbackEnabled && vibrator != null && vibrator.hasVibrator()) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                vibrator.vibrate(VibrationEffect.createOneShot(15, VibrationEffect.DEFAULT_AMPLITUDE));
+        if (touchHapticFeedbackEnabled && vibrator != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK));
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE));
             } else {
-                vibrator.vibrate(15);
+                vibrator.vibrate(50);
             }
         }
     }
