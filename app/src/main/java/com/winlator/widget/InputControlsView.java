@@ -73,6 +73,7 @@ public class InputControlsView extends View {
         setClickable(true);
         setFocusable(true);
         setFocusableInTouchMode(true);
+        setHapticFeedbackEnabled(true);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             VibratorManager manager = (VibratorManager)context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE);
             vibrator = manager != null ? manager.getDefaultVibrator() : null;
@@ -246,12 +247,10 @@ public class InputControlsView extends View {
 
     public void performTouchHapticFeedback() {
         if (touchHapticFeedbackEnabled && vibrator != null) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK));
-            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE));
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                vibrator.vibrate(VibrationEffect.createOneShot(30, 200));
             } else {
-                vibrator.vibrate(50);
+                vibrator.vibrate(30);
             }
         }
     }
