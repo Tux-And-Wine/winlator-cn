@@ -11,6 +11,10 @@ import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
+import android.os.Build;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
+import android.os.VibratorManager;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -62,13 +66,19 @@ public class InputControlsView extends View {
     private final PointF mouseMoveOffset = new PointF();
     private boolean showTouchscreenControls = true;
     private boolean touchHapticFeedbackEnabled = true;
+    private Vibrator vibrator;
 
     public InputControlsView(Context context) {
         super(context);
         setClickable(true);
         setFocusable(true);
         setFocusableInTouchMode(true);
-        super.setHapticFeedbackEnabled(true);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            VibratorManager manager = (VibratorManager)context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE);
+            vibrator = manager != null ? manager.getDefaultVibrator() : null;
+        } else {
+            vibrator = (Vibrator)context.getSystemService(Context.VIBRATOR_SERVICE);
+        }
         setBackgroundColor(0x00000000);
         setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
     }
@@ -232,6 +242,16 @@ public class InputControlsView extends View {
 
     public void setTouchHapticFeedbackEnabled(boolean touchHapticFeedbackEnabled) {
         this.touchHapticFeedbackEnabled = touchHapticFeedbackEnabled;
+    }
+
+    public void performTouchHapticFeedback() {
+        if (touchHapticFeedbackEnabled && vibrator != null && vibrator.hasVibrator()) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                vibrator.vibrate(VibrationEffect.createOneShot(15, VibrationEffect.DEFAULT_AMPLITUDE));
+            } else {
+                vibrator.vibrate(15);
+            }
+        }
     }
 
     private synchronized ControlElement intersectElement(float x, float y) {

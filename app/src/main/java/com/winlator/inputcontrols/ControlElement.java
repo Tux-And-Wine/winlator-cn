@@ -8,7 +8,6 @@ import android.graphics.Path;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 
 import androidx.core.graphics.ColorUtils;
@@ -809,7 +808,7 @@ public class ControlElement {
 
     private void performHapticFeedback() {
         if (inputControlsView.isTouchHapticFeedbackEnabled()) {
-            inputControlsView.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+            inputControlsView.performTouchHapticFeedback();
         }
     }
 
