@@ -8,6 +8,7 @@ import android.graphics.Path;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 
 import androidx.core.graphics.ColorUtils;
@@ -815,6 +816,7 @@ public class ControlElement {
                 if (propertyFlags.isSet(FLAG_MOUSE_MOVE_MODE)) inputControlsView.getTouchpadView().mouseMove(x, y, MotionEvent.ACTION_DOWN);
 
                 propertyFlags.set(FLAG_PRESSED);
+                inputControlsView.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
                 inputControlsView.invalidate();
                 return true;
             }
