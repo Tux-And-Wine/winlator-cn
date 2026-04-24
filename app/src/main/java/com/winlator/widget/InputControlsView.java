@@ -61,6 +61,7 @@ public class InputControlsView extends View {
     private Timer mouseMoveTimer;
     private final PointF mouseMoveOffset = new PointF();
     private boolean showTouchscreenControls = true;
+    private boolean hapticFeedbackEnabled = true;
 
     public InputControlsView(Context context) {
         super(context);
@@ -223,6 +224,14 @@ public class InputControlsView extends View {
 
     public void setShowTouchscreenControls(boolean showTouchscreenControls) {
         this.showTouchscreenControls = showTouchscreenControls;
+    }
+
+    public boolean isHapticFeedbackEnabled() {
+        return hapticFeedbackEnabled;
+    }
+
+    public void setHapticFeedbackEnabled(boolean hapticFeedbackEnabled) {
+        this.hapticFeedbackEnabled = hapticFeedbackEnabled;
     }
 
     private synchronized ControlElement intersectElement(float x, float y) {

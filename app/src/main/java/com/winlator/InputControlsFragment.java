@@ -158,6 +158,10 @@ public class InputControlsFragment extends Fragment {
         sbOverlayOpacity.setOnValueChangeListener((seekBar, value) -> preferences.edit().putFloat("overlay_opacity", value / 100.0f).apply());
         sbOverlayOpacity.setValue(preferences.getFloat("overlay_opacity", InputControlsView.DEFAULT_OVERLAY_OPACITY) * 100);
 
+        CheckBox cbHapticFeedback = view.findViewById(R.id.CBHapticFeedback);
+        cbHapticFeedback.setOnCheckedChangeListener((buttonView, isChecked) -> preferences.edit().putBoolean("haptic_feedback", isChecked).apply());
+        cbHapticFeedback.setChecked(preferences.getBoolean("haptic_feedback", true));
+
         view.findViewById(R.id.BTAddProfile).setOnClickListener((v) -> ContentDialog.prompt(context, R.string.profile_name, null, (name) -> {
             currentProfile = manager.createProfile(name);
             loadProfileSpinner(sProfile);

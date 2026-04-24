@@ -102,6 +102,7 @@
     <string name="press_any_button_on_your_controller">Press any button on your controller</string>
     <string name="bindings">Bindings</string>
     <string name="show_touchscreen_controls">Show Touchscreen Controls</string>
+    <string name="haptic_feedback">Haptic Feedback</string>
     <string name="dxwrapper" translatable="false">DX Wrapper</string>
     <string name="mouse_warp_override" translatable="false">Mouse Warp Override</string>
     <string name="direct3d" translatable="false">Direct3D</string>

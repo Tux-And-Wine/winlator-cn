@@ -101,6 +101,7 @@
     <string name="press_any_button_on_your_controller">按下控制器上的任何按钮</string>
     <string name="bindings">Bindings</string>
     <string name="show_touchscreen_controls">显示触摸屏控件</string>
+    <string name="haptic_feedback">振动反馈</string>
     <string name="dxwrapper" translatable="false">图形加速(请点击❓查看说明)</string>
     <string name="mouse_warp_override" translatable="false">游标覆盖偏移(影响鼠标移动)</string>
     <string name="direct3d" translatable="false">D3D运行库(direct3d)</string>
