@@ -15,6 +15,7 @@ import android.os.Build;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.os.VibratorManager;
+import android.os.VibrationAttributes;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -247,7 +248,9 @@ public class InputControlsView extends View {
 
     public void performTouchHapticFeedback() {
         if (touchHapticFeedbackEnabled && vibrator != null) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                vibrator.vibrate(VibrationEffect.createOneShot(30, 200), new VibrationAttributes.Builder().setUsage(VibrationAttributes.USAGE_PHYSICAL_EMULATION).build());
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 vibrator.vibrate(VibrationEffect.createOneShot(30, 200));
             } else {
                 vibrator.vibrate(30);
