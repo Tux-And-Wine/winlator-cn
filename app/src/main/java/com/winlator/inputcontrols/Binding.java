@@ -67,6 +67,8 @@ public enum Binding {
                 return "KP +";
             case KEY_KP_SUBTRACT:
                 return "KP -";
+            case MOUSE_SWAPL_R_BUTTONS:
+                return "SWAP L&R";
             default:
                 return super.toString().replaceAll("^(MOUSE_)|(KEY_)|(GAMEPAD_)", "").replace("KP_", "NUMPAD_").replace("_", " ");
         }
