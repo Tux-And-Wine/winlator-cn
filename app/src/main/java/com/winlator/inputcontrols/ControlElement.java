@@ -96,6 +96,9 @@ public class ControlElement {
     private int pressedColor = 0xff000000;
     private float iconScale = 1.0f;
     private float iconOpacity = 1.0f;
+    private Binding trackpadPressBinding = Binding.NONE;
+    private int trackpadPressOffsetX = 0;
+    private int trackpadPressOffsetY = 0;
     private Range range;
     private byte orientation;
     private PointF currentPosition;
@@ -127,6 +130,9 @@ public class ControlElement {
                 bindings[1] = Binding.MOUSE_MOVE_RIGHT;
                 bindings[2] = Binding.MOUSE_MOVE_DOWN;
                 bindings[3] = Binding.MOUSE_MOVE_LEFT;
+                trackpadPressBinding = Binding.NONE;
+                trackpadPressOffsetX = 0;
+                trackpadPressOffsetY = 0;
                 break;
             case RANGE_BUTTON:
                 scroller = new RangeScroller(inputControlsView, this);
@@ -146,6 +152,9 @@ public class ControlElement {
         pressedColor = 0xff000000;
         iconScale = 1.0f;
         iconOpacity = 1.0f;
+        trackpadPressBinding = type == Type.TRACKPAD ? trackpadPressBinding : Binding.NONE;
+        trackpadPressOffsetX = type == Type.TRACKPAD ? trackpadPressOffsetX : 0;
+        trackpadPressOffsetY = type == Type.TRACKPAD ? trackpadPressOffsetY : 0;
         range = null;
         propertyFlags.set(FLAG_BOUNDING_BOX_NEEDS_UPDATE);
     }
@@ -344,6 +353,30 @@ public class ControlElement {
 
     public void setIconOpacity(float iconOpacity) {
         this.iconOpacity = iconOpacity;
+    }
+
+    public Binding getTrackpadPressBinding() {
+        return trackpadPressBinding;
+    }
+
+    public void setTrackpadPressBinding(Binding trackpadPressBinding) {
+        this.trackpadPressBinding = trackpadPressBinding != null ? trackpadPressBinding : Binding.NONE;
+    }
+
+    public int getTrackpadPressOffsetY() {
+        return trackpadPressOffsetY;
+    }
+
+    public int getTrackpadPressOffsetX() {
+        return trackpadPressOffsetX;
+    }
+
+    public void setTrackpadPressOffsetX(int trackpadPressOffsetX) {
+        this.trackpadPressOffsetX = trackpadPressOffsetX;
+    }
+
+    public void setTrackpadPressOffsetY(int trackpadPressOffsetY) {
+        this.trackpadPressOffsetY = trackpadPressOffsetY;
     }
 
     public Rect getBoundingBox() {
@@ -862,6 +895,15 @@ public class ControlElement {
                 if (orientation != 0) elementJSONObject.put("orientation", orientation);
             }
             if (propertyFlags.isSet(FLAG_MOUSE_MOVE_MODE)) elementJSONObject.put("mouseMoveMode", true);
+            if (type == Type.TRACKPAD && trackpadPressBinding != Binding.NONE) {
+                elementJSONObject.put("trackpadPressBinding", trackpadPressBinding.name());
+            }
+            if (type == Type.TRACKPAD && trackpadPressOffsetX != 0) {
+                elementJSONObject.put("trackpadPressOffsetX", trackpadPressOffsetX);
+            }
+            if (type == Type.TRACKPAD && trackpadPressOffsetY != 0) {
+                elementJSONObject.put("trackpadPressOffsetY", trackpadPressOffsetY);
+            }
 
             return elementJSONObject;
         }
@@ -925,6 +967,7 @@ public class ControlElement {
                 if (type == Type.TRACKPAD) {
                     if (currentPosition == null) currentPosition = new PointF();
                     currentPosition.set(x, y);
+                    pressTrackpadPointerButton();
                 }
                 return handleTouchMove(pointerId, x, y);
             }
@@ -1095,6 +1138,9 @@ public class ControlElement {
                 else if (type == Type.STICK) {
                     inputControlsView.invalidate();
                 }
+                else if (type == Type.TRACKPAD) {
+                    releaseTrackpadPointerButton();
+                }
 
                 if (currentPosition != null) currentPosition = null;
             }
@@ -1165,5 +1211,19 @@ public class ControlElement {
 
     public int getHighlightColor() {
         return Color.argb((int)(inputControlsView.getOverlayOpacity() * 255), 2, 119, 189);
+    }
+
+    private void pressTrackpadPointerButton() {
+        if (trackpadPressBinding == Binding.NONE || inputControlsView.getXServer() == null) return;
+
+        int centerX = Mathf.clamp(inputControlsView.getMaxWidth() / 2 + trackpadPressOffsetX, 0, Math.max(0, inputControlsView.getMaxWidth() - 1));
+        int centerY = Mathf.clamp(inputControlsView.getMaxHeight() / 2 + trackpadPressOffsetY, 0, Math.max(0, inputControlsView.getMaxHeight() - 1));
+        inputControlsView.getXServer().injectPointerMove(centerX, centerY);
+        inputControlsView.handleInputEvent(trackpadPressBinding, true);
+    }
+
+    private void releaseTrackpadPointerButton() {
+        if (trackpadPressBinding == Binding.NONE || inputControlsView.getXServer() == null) return;
+        inputControlsView.handleInputEvent(trackpadPressBinding, false);
     }
 }

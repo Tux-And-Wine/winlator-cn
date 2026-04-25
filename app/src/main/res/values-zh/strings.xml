@@ -389,4 +389,7 @@
     <string name="unable_to_restore_container">无法恢复容器</string>
     <string name="invalid_restore_file">请选择 .whp 文件</string>
     <string name="touchpad_mode">触控板模式</string>
+    <string name="touch_move_mouse_button">&#x89E6;&#x6478;&#x79FB;&#x52A8;&#x65F6;&#x6309;&#x4E0B;&#x9F20;&#x6807;&#x952E;</string>
+    <string name="x_coordinate_center_offset">X&#x5750;&#x6807;&#x4E2D;&#x5FC3;&#x70B9;&#x5FAE;&#x8C03;</string>
+    <string name="y_coordinate_center_offset">Y&#x5750;&#x6807;&#x4E2D;&#x5FC3;&#x70B9;&#x5FAE;&#x8C03;</string>
 </resources>

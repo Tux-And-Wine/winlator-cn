@@ -136,6 +136,51 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/LLTrackpadOptions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/touch_move_mouse_button" />
+
+            <Spinner
+                style="@style/ComboBox"
+                android:id="@+id/STrackpadPressBinding"
+                android:layout_width="match_parent" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/x_coordinate_center_offset" />
+
+            <com.winlator.widget.SeekBar
+                android:id="@+id/SBTrackpadPressOffsetX"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:maxValue="500"
+                app:minValue="-500"
+                app:step="5"
+                app:suffix="px" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/y_coordinate_center_offset" />
+
+            <com.winlator.widget.SeekBar
+                android:id="@+id/SBTrackpadPressOffsetY"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:maxValue="500"
+                app:minValue="-500"
+                app:step="5"
+                app:suffix="px" />
+        </LinearLayout>
+
+        <LinearLayout
             android:id="@+id/LLRadialMenuOptions"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

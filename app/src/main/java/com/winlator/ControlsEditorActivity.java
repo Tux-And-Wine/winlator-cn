@@ -59,6 +59,12 @@ public class ControlsEditorActivity extends AppCompatActivity implements View.On
     private static final int OPEN_CUSTOM_ICON_REQUEST_CODE = 1001;
     private static final int IMPORT_ICON_PACK_REQUEST_CODE = 1002;
     private static final int EXPORT_ICON_PACK_REQUEST_CODE = 1003;
+    private static final Binding[] TRACKPAD_PRESS_BINDINGS = {
+        Binding.NONE,
+        Binding.MOUSE_LEFT_BUTTON,
+        Binding.MOUSE_RIGHT_BUTTON,
+        Binding.MOUSE_MIDDLE_BUTTON
+    };
     private InputControlsView inputControlsView;
     private ControlsProfile profile;
     private IconPackManager iconPackManager;
@@ -224,6 +230,7 @@ public class ControlsEditorActivity extends AppCompatActivity implements View.On
             view.findViewById(R.id.LLCustomTextIcon).setVisibility(View.GONE);
             view.findViewById(R.id.LLRangeOptions).setVisibility(View.GONE);
             view.findViewById(R.id.LLMIDIKeyOptions).setVisibility(View.GONE);
+            view.findViewById(R.id.LLTrackpadOptions).setVisibility(View.GONE);
             view.findViewById(R.id.LLRadialMenuOptions).setVisibility(View.GONE);
 
             switch (type) {
@@ -239,6 +246,12 @@ public class ControlsEditorActivity extends AppCompatActivity implements View.On
                 case MIDI_KEY:
                     view.findViewById(R.id.LLMIDIKeyOptions).setVisibility(View.VISIBLE);
                     break;
+                case TRACKPAD:
+                    view.findViewById(R.id.LLTrackpadOptions).setVisibility(View.VISIBLE);
+                    ((Spinner)view.findViewById(R.id.STrackpadPressBinding)).setSelection(getTrackpadPressBindingIndex(element.getTrackpadPressBinding()), false);
+                    ((SeekBar)view.findViewById(R.id.SBTrackpadPressOffsetX)).setValue(element.getTrackpadPressOffsetX());
+                    ((SeekBar)view.findViewById(R.id.SBTrackpadPressOffsetY)).setValue(element.getTrackpadPressOffsetY());
+                    break;
                 case RADIAL_MENU:
                     ((NumberPicker)view.findViewById(R.id.NPBindings)).setValue(element.getBindingCount());
                     view.findViewById(R.id.LLRadialMenuOptions).setVisibility(View.VISIBLE);
@@ -252,6 +265,21 @@ public class ControlsEditorActivity extends AppCompatActivity implements View.On
         loadShapeSpinner(element, view.findViewById(R.id.SShape));
         loadRangeSpinner(element, view.findViewById(R.id.SRange));
         loadNoteSpinner(element, view.findViewById(R.id.SNote));
+        loadTrackpadPressBindingSpinner(element, view.findViewById(R.id.STrackpadPressBinding));
+
+        SeekBar sbTrackpadPressOffsetX = view.findViewById(R.id.SBTrackpadPressOffsetX);
+        sbTrackpadPressOffsetX.setValue(element.getTrackpadPressOffsetX());
+        sbTrackpadPressOffsetX.setOnValueChangeListener((seekBar, value) -> {
+            element.setTrackpadPressOffsetX(Math.round(value));
+            profile.save();
+        });
+
+        SeekBar sbTrackpadPressOffsetY = view.findViewById(R.id.SBTrackpadPressOffsetY);
+        sbTrackpadPressOffsetY.setValue(element.getTrackpadPressOffsetY());
+        sbTrackpadPressOffsetY.setOnValueChangeListener((seekBar, value) -> {
+            element.setTrackpadPressOffsetY(Math.round(value));
+            profile.save();
+        });
 
         RadioGroup rgOrientation = view.findViewById(R.id.RGOrientation);
         rgOrientation.check(element.getOrientation() == 1 ? R.id.RBVertical : R.id.RBHorizontal);
@@ -529,6 +557,35 @@ public class ControlsEditorActivity extends AppCompatActivity implements View.On
             @Override
             public void onNothingSelected(AdapterView<?> parent) {}
         });
+    }
+
+    private void loadTrackpadPressBindingSpinner(final ControlElement element, Spinner spinner) {
+        String[] labels = new String[TRACKPAD_PRESS_BINDINGS.length];
+        labels[0] = getString(R.string.none);
+        for (int i = 1; i < TRACKPAD_PRESS_BINDINGS.length; i++) labels[i] = TRACKPAD_PRESS_BINDINGS[i].toString();
+
+        spinner.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, labels));
+        spinner.setSelection(getTrackpadPressBindingIndex(element.getTrackpadPressBinding()), false);
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                Binding binding = TRACKPAD_PRESS_BINDINGS[position];
+                if (binding != element.getTrackpadPressBinding()) {
+                    element.setTrackpadPressBinding(binding);
+                    profile.save();
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
+    }
+
+    private static int getTrackpadPressBindingIndex(Binding binding) {
+        for (int i = 0; i < TRACKPAD_PRESS_BINDINGS.length; i++) {
+            if (TRACKPAD_PRESS_BINDINGS[i] == binding) return i;
+        }
+        return 0;
     }
 
     private void loadNoteSpinner(final ControlElement element, Spinner spinner) {

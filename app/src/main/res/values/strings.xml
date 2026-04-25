@@ -84,6 +84,9 @@
     <string name="icon_size">Icon Size</string>
     <string name="icon_opacity">Icon Opacity</string>
     <string name="pressed_color">Pressed Color</string>
+    <string name="touch_move_mouse_button">Mouse Button While Moving</string>
+    <string name="x_coordinate_center_offset">X Center Offset</string>
+    <string name="y_coordinate_center_offset">Y Center Offset</string>
     <string name="select_local_icon">Select Local Icon</string>
     <string name="clear_icon">Clear</string>
     <string name="unable_to_load_image">Unable to load image</string>

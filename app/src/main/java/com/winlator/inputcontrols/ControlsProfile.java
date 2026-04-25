@@ -263,6 +263,9 @@ public class ControlsProfile implements Comparable<ControlsProfile>, GamepadSlot
                     if (elementJSONObject.has("range")) element.setRange(ControlElement.Range.valueOf(elementJSONObject.getString("range")));
                     if (elementJSONObject.has("orientation")) element.setOrientation((byte)elementJSONObject.getInt("orientation"));
                     if (elementJSONObject.has("mouseMoveMode")) element.setMouseMoveMode(true);
+                    if (elementJSONObject.has("trackpadPressBinding")) element.setTrackpadPressBinding(Binding.fromString(elementJSONObject.getString("trackpadPressBinding")));
+                    if (elementJSONObject.has("trackpadPressOffsetX")) element.setTrackpadPressOffsetX(elementJSONObject.getInt("trackpadPressOffsetX"));
+                    if (elementJSONObject.has("trackpadPressOffsetY")) element.setTrackpadPressOffsetY(elementJSONObject.getInt("trackpadPressOffsetY"));
                     if (elementJSONObject.has("opacity")) element.setOpacity((float)elementJSONObject.getDouble("opacity"));
                 }
 
