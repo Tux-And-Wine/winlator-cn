@@ -524,7 +524,7 @@ public class InputControlsView extends View {
                 mouseMoveOffset.y = isActionDown ? (offset != 0 ? offset : (binding == Binding.MOUSE_MOVE_UP ? -1 : 1)) : 0;
                 if (isActionDown) createMouseMoveTimer();
             }
-            else if (binding == Binding.MOUSE_SWAP_BUTTONS) {
+            else if (binding == Binding.MOUSE_SWAPL_R_BUTTONS) {
                 if (isActionDown && touchpadView != null) touchpadView.setSwapMouseButtons();
             }
             else if (binding == Binding.MOUSE_SHOW_INPUT_METHOD) {
