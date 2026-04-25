@@ -214,8 +214,9 @@ public class SettingsFragment extends Fragment {
             boolean restartApp = oldLCIndex != newLCIndex || oldAppThemeId != newAppThemeId;
 
             int midiInputDevicePosition = sMIDIInputDevice.getSelectedItemPosition();
+            Object selectedItem = sMIDIInputDevice.getSelectedItem();
             editor.putString("midi_input_device", midiInputDevicePosition == 0 ? "none" :
-                                                 (midiInputDevicePosition == 1 ? "auto" : sMIDIInputDevice.getSelectedItem().toString()));
+                                                 (midiInputDevicePosition == 1 ? "auto" : selectedItem != null ? selectedItem.toString() : "auto"));
 
             String logPath = etLogFile.getText().toString().trim();
             if (!logPath.equals(defaultLogPath) && !logPath.isEmpty()) {
@@ -450,8 +451,18 @@ public class SettingsFragment extends Fragment {
     }
 
     private void loadMIDIInputDeviceSpinner(final Spinner sMIDIInputDevice, final String selectedValue) {
+        if (!isAdded()) return;
         Context context = getContext();
         MidiManager mm = (MidiManager)context.getSystemService(Context.MIDI_SERVICE);
+        if (mm == null) {
+            ArrayList<String> items = new ArrayList<>();
+            items.add(context.getString(R.string.none));
+            items.add(context.getString(R.string.auto));
+            sMIDIInputDevice.setAdapter(new ArrayAdapter<>(context, android.R.layout.simple_spinner_dropdown_item, items));
+            sMIDIInputDevice.setSelection(selectedValue.equals("none") ? 0 : 1, false);
+            return;
+        }
+
         MidiDeviceInfo[] infos = mm.getDevices();
 
         if (!midiDeviceCallbackRegistered) {
@@ -476,7 +487,8 @@ public class SettingsFragment extends Fragment {
         for (MidiDeviceInfo info : infos) {
             if (info.getOutputPortCount() > 0) {
                 Bundle properties = info.getProperties();
-                items.add(properties.getString(MidiDeviceInfo.PROPERTY_NAME));
+                String name = properties.getString(MidiDeviceInfo.PROPERTY_NAME);
+                if (name != null) items.add(name);
             }
         }
 
