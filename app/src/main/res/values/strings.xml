@@ -248,6 +248,7 @@
     <string name="copying_files">Copying Files...</string>
     <string name="removing_files">Removing Files...</string>
     <string name="disable_mouse_input">Disable Mouse Input</string>
+    <string name="vibrate_on_touch">Vibrate on touch</string>
     <string name="move_cursor_to_touchpoint">Move Cursor to Touchpoint</string>
     <string name="sync_every_frame">Sync every frame</string>
     <string name="dpi_font_size">DPI (Font Size)</string>

@@ -136,18 +136,28 @@ public class InputControlsFragment extends Fragment {
             }
         });
 
+        CheckBox cbVibrateOnTouch = view.findViewById(R.id.CBVibrateOnTouch);
+        cbVibrateOnTouch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (currentProfile != null) {
+                currentProfile.setVibrateOnTouch(isChecked);
+                currentProfile.save();
+            }
+        });
+
         updateLayout = () -> {
             if (currentProfile != null) {
                 sbCursorSpeed.setValue(currentProfile.getCursorSpeed() * 100);
                 cbDisableMouseInput.setChecked(currentProfile.isDisableMouseInput());
                 sTouchpadMode.setSelection(currentProfile.getTouchpadMode(), false);
                 cbMoveCursorToTouchpoint.setChecked(currentProfile.isMoveCursorToTouchpoint());
+                cbVibrateOnTouch.setChecked(currentProfile.isVibrateOnTouch());
             }
             else {
                 sbCursorSpeed.setValue(100);
                 cbDisableMouseInput.setChecked(false);
                 sTouchpadMode.setSelection(0, false);
                 cbMoveCursorToTouchpoint.setChecked(false);
+                cbVibrateOnTouch.setChecked(false);
             }
             loadExternalControllers(view);
         };

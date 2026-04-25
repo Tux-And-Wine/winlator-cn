@@ -24,6 +24,7 @@ public class ControlsProfile implements Comparable<ControlsProfile>, GamepadSlot
     private boolean disableMouseInput = false;
     private byte touchpadMode = 0;
     private boolean moveCursorToTouchpoint = false;
+    private boolean vibrateOnTouch = false;
     private final ArrayList<ControlElement> elements = new ArrayList<>();
     private final ArrayList<ExternalController> controllers = new ArrayList<>();
     private final List<ControlElement> immutableElements = Collections.unmodifiableList(elements);
@@ -78,6 +79,14 @@ public class ControlsProfile implements Comparable<ControlsProfile>, GamepadSlot
 
     public void setMoveCursorToTouchpoint(boolean moveCursorToTouchpoint) {
         this.moveCursorToTouchpoint = moveCursorToTouchpoint;
+    }
+
+    public boolean isVibrateOnTouch() {
+        return vibrateOnTouch;
+    }
+
+    public void setVibrateOnTouch(boolean vibrateOnTouch) {
+        this.vibrateOnTouch = vibrateOnTouch;
     }
 
     public boolean isVirtualGamepad() {
@@ -146,6 +155,7 @@ public class ControlsProfile implements Comparable<ControlsProfile>, GamepadSlot
             if (disableMouseInput) data.put("disableMouseInput", disableMouseInput);
             if (touchpadMode != 0) data.put("touchpadMode", touchpadMode);
             if (moveCursorToTouchpoint) data.put("moveCursorToTouchpoint", moveCursorToTouchpoint);
+            if (vibrateOnTouch) data.put("vibrateOnTouch", vibrateOnTouch);
 
             JSONArray elementsJSONArray = new JSONArray();
             if (!elementsLoaded && file.isFile()) {
@@ -241,6 +251,7 @@ public class ControlsProfile implements Comparable<ControlsProfile>, GamepadSlot
 
         try {
             JSONObject profileJSONObject = new JSONObject(FileUtils.readString(file));
+            if (profileJSONObject.has("vibrateOnTouch")) vibrateOnTouch = profileJSONObject.getBoolean("vibrateOnTouch");
             JSONArray elementsJSONArray = profileJSONObject.getJSONArray("elements");
             for (int i = 0; i < elementsJSONArray.length(); i++) {
                 JSONObject elementJSONObject = elementsJSONArray.getJSONObject(i);

@@ -247,6 +247,7 @@
     <string name="copying_files">正在复制文件...</string>
     <string name="removing_files">正在删除文件.</string>
     <string name="disable_mouse_input">禁用鼠标输入</string>
+    <string name="vibrate_on_touch">触摸振动</string>
     <string name="move_cursor_to_touchpoint">鼠标跟手</string>
     <string name="sync_every_frame">同步每一帧</string>
     <string name="dpi_font_size">DPI (字体大小)</string>

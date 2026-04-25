@@ -11,6 +11,8 @@ import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -61,6 +63,7 @@ public class InputControlsView extends View {
     private Timer mouseMoveTimer;
     private final PointF mouseMoveOffset = new PointF();
     private boolean showTouchscreenControls = true;
+    private Vibrator vibrator;
 
     public InputControlsView(Context context) {
         super(context);
@@ -69,6 +72,7 @@ public class InputControlsView extends View {
         setFocusableInTouchMode(true);
         setBackgroundColor(0x00000000);
         setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        vibrator = (Vibrator)context.getSystemService(Context.VIBRATOR_SERVICE);
     }
 
     public void setEditMode(boolean editMode) {
@@ -383,7 +387,12 @@ public class InputControlsView extends View {
 
                     touchpadView.setPointerButtonLeftEnabled(true);
                     for (ControlElement element : profile.getElements()) {
-                        if (element.handleTouchDown(pointerId, x, y)) handled = true;
+                        if (element.handleTouchDown(pointerId, x, y)) {
+                            handled = true;
+                            if (profile.isVibrateOnTouch() && vibrator != null && vibrator.hasVibrator()) {
+                                vibrator.vibrate(VibrationEffect.createOneShot(30, VibrationEffect.DEFAULT_AMPLITUDE));
+                            }
+                        }
                         //可能为了防误触，以后鼠标触摸扩展需要关掉这个
                         //if (element.getBindingAt(0) == Binding.MOUSE_LEFT_BUTTON) {
                         //    touchpadView.setPointerButtonLeftEnabled(false);

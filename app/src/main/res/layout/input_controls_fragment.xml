@@ -105,6 +105,13 @@
             android:text="@string/disable_mouse_input"
             android:layout_marginTop="8dp" />
 
+        <CheckBox
+            android:id="@+id/CBVibrateOnTouch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/vibrate_on_touch"
+            android:layout_marginTop="8dp" />
+
         <View
             style="@style/HorizontalLine"
             android:layout_marginTop="16dp" />
