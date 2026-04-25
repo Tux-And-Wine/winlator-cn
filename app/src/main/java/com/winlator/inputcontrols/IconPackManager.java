@@ -1,0 +1,339 @@
+package com.winlator.inputcontrols;
+
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.net.Uri;
+
+import androidx.preference.PreferenceManager;
+
+import com.catfixture.inputbridge.core.iconmanager.BitmapData;
+import com.catfixture.inputbridge.core.iconmanager.Icon;
+import com.catfixture.inputbridge.core.iconmanager.IconPack;
+import com.winlator.core.FileUtils;
+import com.winlator.core.StreamUtils;
+import com.winlator.core.StringUtils;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.ByteArrayOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
+public class IconPackManager {
+    private static final byte[] JAVA_SERIALIZATION_HEADER = {(byte)0xAC, (byte)0xED, 0x00, 0x05};
+    private static final String PREF_ACTIVE_PACK_ID = "controls_editor_active_icon_pack_id";
+    private static final String METADATA_FILENAME = "metadata.json";
+
+    public static class PackIcon {
+        public final String name;
+        public final String path;
+        public final int scaleType;
+        public final File file;
+
+        public PackIcon(String name, String path, int scaleType, File file) {
+            this.name = name;
+            this.path = path;
+            this.scaleType = scaleType;
+            this.file = file;
+        }
+
+        public byte[] readBytes() {
+            return FileUtils.read(file);
+        }
+    }
+
+    public static class StoredIconPack {
+        public final String id;
+        public final String name;
+        public final String author;
+        public final boolean enabled;
+        public final long packSize;
+        public final ArrayList<PackIcon> icons;
+        public final PackIcon customIcon;
+        public final File dir;
+
+        public StoredIconPack(String id, String name, String author, boolean enabled, long packSize, ArrayList<PackIcon> icons, PackIcon customIcon, File dir) {
+            this.id = id;
+            this.name = name;
+            this.author = author;
+            this.enabled = enabled;
+            this.packSize = packSize;
+            this.icons = icons;
+            this.customIcon = customIcon;
+            this.dir = dir;
+        }
+    }
+
+    private final Context context;
+    private final SharedPreferences preferences;
+
+    public IconPackManager(Context context) {
+        this.context = context;
+        preferences = PreferenceManager.getDefaultSharedPreferences(context);
+    }
+
+    public static File getIconPacksDir(Context context) {
+        File dir = new File(context.getFilesDir(), "inputcontrols/iconpacks");
+        if (!dir.isDirectory()) dir.mkdirs();
+        return dir;
+    }
+
+    public ArrayList<StoredIconPack> getPacks() {
+        File[] dirs = getIconPacksDir(context).listFiles(File::isDirectory);
+        ArrayList<StoredIconPack> packs = new ArrayList<>();
+        if (dirs != null) {
+            for (File dir : dirs) {
+                StoredIconPack pack = loadPack(dir);
+                if (pack != null) packs.add(pack);
+            }
+        }
+        Collections.sort(packs, Comparator.comparing(pack -> pack.name.toLowerCase()));
+        return packs;
+    }
+
+    public StoredIconPack getActivePack() {
+        String activePackId = getActivePackId();
+        if (activePackId == null || activePackId.isEmpty()) return null;
+        return loadPack(new File(getIconPacksDir(context), activePackId));
+    }
+
+    public String getActivePackId() {
+        return preferences.getString(PREF_ACTIVE_PACK_ID, null);
+    }
+
+    public void setActivePackId(String packId) {
+        preferences.edit().putString(PREF_ACTIVE_PACK_ID, packId).apply();
+    }
+
+    public StoredIconPack importPack(Uri uri) throws IOException, ClassNotFoundException, JSONException {
+        byte[] bytes;
+        try (InputStream inputStream = context.getContentResolver().openInputStream(uri)) {
+            if (inputStream == null) throw new IOException("Cannot open input stream");
+            bytes = StreamUtils.copyToByteArray(inputStream);
+        }
+
+        if (!isSerializedIpk(bytes)) {
+            throw new IOException(describeInvalidHeader(bytes));
+        }
+
+        try {
+            return importPack(deserializeIconPack(bytes));
+        }
+        catch (IOException | ClassNotFoundException firstException) {
+            File tempFile = FileUtils.createTempFile(context.getCacheDir(), "icon-pack-import");
+            try {
+                if (!FileUtils.write(tempFile, bytes)) throw new IOException("Failed to stage icon pack");
+                try (ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream(tempFile))) {
+                    IconPack iconPack = (IconPack)objectInputStream.readObject();
+                    return importPack(iconPack);
+                }
+            }
+            catch (IOException | ClassNotFoundException secondException) {
+                secondException.addSuppressed(firstException);
+                throw secondException;
+            }
+            finally {
+                FileUtils.delete(tempFile);
+            }
+        }
+    }
+
+    public StoredIconPack importPack(IconPack iconPack) throws JSONException {
+        String packName = iconPack.name != null && !iconPack.name.trim().isEmpty() ? iconPack.name.trim() : "Imported Pack";
+        String baseId = StringUtils.clearReservedChars(packName).replaceAll("\\s+", "-").toLowerCase();
+        if (baseId.isEmpty()) baseId = "icon-pack";
+
+        File dir = new File(getIconPacksDir(context), baseId);
+        int suffix = 1;
+        while (dir.exists()) dir = new File(getIconPacksDir(context), baseId+"-"+suffix++);
+        dir.mkdirs();
+
+        JSONObject metadata = new JSONObject();
+        metadata.put("id", dir.getName());
+        metadata.put("name", packName);
+        metadata.put("author", iconPack.author != null ? iconPack.author : "");
+        metadata.put("enabled", iconPack.isEnabled);
+        metadata.put("packSize", iconPack.packSize);
+
+        JSONArray iconsJSONArray = new JSONArray();
+        if (iconPack.icons != null) {
+            for (int i = 0; i < iconPack.icons.size(); i++) {
+                Icon icon = iconPack.icons.get(i);
+                if (icon == null || icon.bmpData == null || icon.bmpData.binData == null || icon.bmpData.binData.length == 0) continue;
+
+                String filename = String.format("%03d.bin", i);
+                FileUtils.write(new File(dir, filename), icon.bmpData.binData);
+
+                JSONObject iconJSONObject = new JSONObject();
+                iconJSONObject.put("name", icon.name != null ? icon.name : "");
+                iconJSONObject.put("path", icon.path != null ? icon.path : "");
+                iconJSONObject.put("scaleType", icon.scaleType);
+                iconJSONObject.put("fileName", filename);
+                iconsJSONArray.put(iconJSONObject);
+            }
+        }
+        metadata.put("icons", iconsJSONArray);
+
+        if (iconPack.customIcon != null && iconPack.customIcon.bmpData != null && iconPack.customIcon.bmpData.binData != null && iconPack.customIcon.bmpData.binData.length > 0) {
+            String filename = "custom.bin";
+            FileUtils.write(new File(dir, filename), iconPack.customIcon.bmpData.binData);
+
+            JSONObject customIconJSONObject = new JSONObject();
+            customIconJSONObject.put("name", iconPack.customIcon.name != null ? iconPack.customIcon.name : "");
+            customIconJSONObject.put("path", iconPack.customIcon.path != null ? iconPack.customIcon.path : "");
+            customIconJSONObject.put("scaleType", iconPack.customIcon.scaleType);
+            customIconJSONObject.put("fileName", filename);
+            metadata.put("customIcon", customIconJSONObject);
+        }
+
+        FileUtils.writeString(new File(dir, METADATA_FILENAME), metadata.toString());
+        StoredIconPack storedIconPack = loadPack(dir);
+        setActivePackId(storedIconPack != null ? storedIconPack.id : null);
+        return storedIconPack;
+    }
+
+    public boolean exportPack(StoredIconPack pack, Uri uri) throws IOException {
+        if (pack == null) return false;
+
+        IconPack iconPack = new IconPack();
+        iconPack.name = pack.name;
+        iconPack.author = pack.author;
+        iconPack.isEnabled = pack.enabled;
+        iconPack.icons = new ArrayList<>();
+        iconPack.customIcon = toSerializableIcon(pack.customIcon);
+
+        for (PackIcon packIcon : pack.icons) {
+            Icon icon = toSerializableIcon(packIcon);
+            if (icon != null) iconPack.icons.add(icon);
+        }
+
+        byte[] bytes = serializeIconPack(iconPack);
+        iconPack.packSize = bytes.length;
+        bytes = serializeIconPack(iconPack);
+
+        try (OutputStream outputStream = context.getContentResolver().openOutputStream(uri)) {
+            if (outputStream == null) return false;
+            outputStream.write(bytes);
+            outputStream.flush();
+            return true;
+        }
+    }
+
+    public boolean removePack(String packId) {
+        if (packId == null || packId.isEmpty()) return false;
+        if (packId.equals(getActivePackId())) setActivePackId(null);
+        return FileUtils.delete(new File(getIconPacksDir(context), packId));
+    }
+
+    private StoredIconPack loadPack(File dir) {
+        File metadataFile = new File(dir, METADATA_FILENAME);
+        if (!metadataFile.isFile()) return null;
+
+        try {
+            JSONObject metadata = new JSONObject(FileUtils.readString(metadataFile));
+            String id = metadata.optString("id", dir.getName());
+            String name = metadata.optString("name", dir.getName());
+            String author = metadata.optString("author", "");
+            boolean enabled = metadata.optBoolean("enabled", true);
+            long packSize = metadata.optLong("packSize", 0);
+
+            ArrayList<PackIcon> icons = new ArrayList<>();
+            JSONArray iconsJSONArray = metadata.optJSONArray("icons");
+            if (iconsJSONArray != null) {
+                for (int i = 0; i < iconsJSONArray.length(); i++) {
+                    JSONObject iconJSONObject = iconsJSONArray.getJSONObject(i);
+                    File file = new File(dir, iconJSONObject.getString("fileName"));
+                    if (!file.isFile()) continue;
+                    icons.add(new PackIcon(
+                        iconJSONObject.optString("name", ""),
+                        iconJSONObject.optString("path", ""),
+                        iconJSONObject.optInt("scaleType", 0),
+                        file
+                    ));
+                }
+            }
+
+            PackIcon customIcon = null;
+            if (metadata.has("customIcon")) {
+                JSONObject iconJSONObject = metadata.getJSONObject("customIcon");
+                File file = new File(dir, iconJSONObject.getString("fileName"));
+                if (file.isFile()) {
+                    customIcon = new PackIcon(
+                        iconJSONObject.optString("name", ""),
+                        iconJSONObject.optString("path", ""),
+                        iconJSONObject.optInt("scaleType", 0),
+                        file
+                    );
+                }
+            }
+
+            return new StoredIconPack(id, name, author, enabled, packSize, icons, customIcon, dir);
+        }
+        catch (Exception e) {
+            return null;
+        }
+    }
+
+    private static Icon toSerializableIcon(PackIcon packIcon) {
+        if (packIcon == null) return null;
+        byte[] bytes = packIcon.readBytes();
+        if (bytes == null || bytes.length == 0) return null;
+
+        BitmapData bitmapData = new BitmapData();
+        bitmapData.binData = bytes;
+
+        Icon icon = new Icon();
+        icon.scaleType = packIcon.scaleType;
+        icon.bmpData = bitmapData;
+        icon.name = packIcon.name;
+        icon.path = packIcon.path;
+        return icon;
+    }
+
+    private static byte[] serializeIconPack(IconPack iconPack) throws IOException {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        try (ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream)) {
+            objectOutputStream.writeObject(iconPack);
+            objectOutputStream.flush();
+            return outputStream.toByteArray();
+        }
+    }
+
+    private static IconPack deserializeIconPack(byte[] bytes) throws IOException, ClassNotFoundException {
+        try (ObjectInputStream objectInputStream = new ObjectInputStream(new ByteArrayInputStream(bytes))) {
+            return (IconPack)objectInputStream.readObject();
+        }
+    }
+
+    private static boolean isSerializedIpk(byte[] bytes) {
+        if (bytes == null || bytes.length < JAVA_SERIALIZATION_HEADER.length) return false;
+        for (int i = 0; i < JAVA_SERIALIZATION_HEADER.length; i++) {
+            if (bytes[i] != JAVA_SERIALIZATION_HEADER[i]) return false;
+        }
+        return true;
+    }
+
+    private static String describeInvalidHeader(byte[] bytes) {
+        if (bytes == null || bytes.length == 0) return "Empty file";
+
+        int headerLength = Math.min(bytes.length, 8);
+        StringBuilder builder = new StringBuilder("Invalid IPK header: ");
+        for (int i = 0; i < headerLength; i++) {
+            if (i > 0) builder.append(' ');
+            builder.append(String.format("%02X", bytes[i] & 0xFF));
+        }
+        return builder.toString();
+    }
+}
