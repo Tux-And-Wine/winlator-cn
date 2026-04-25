@@ -31,7 +31,7 @@
     <string name="binding_down">绑定向下按键</string>
     <string name="binding_left">绑定向左按键</string>
     <string name="overlay_opacity">透明度</string>
-    <string name="opacity">Opacity</string>
+    <string name="opacity">不透明度</string>
     <string name="profile">配置文件</string>
     <string name="select_profile">选择控件</string>
     <string name="profile_name">配置名称</string>
