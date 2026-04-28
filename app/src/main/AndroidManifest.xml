@@ -47,6 +47,16 @@
             android:theme="@style/AppThemeFullscreenDark"
             android:screenOrientation="sensorLandscape" />
 
+        <activity android:name="com.winlator.IconPackManagerActivity"
+            android:theme="@style/AppThemeDark"
+            android:exported="false"
+            android:screenOrientation="sensorLandscape" />
+
+        <activity android:name="com.winlator.IconPackDetailsActivity"
+            android:theme="@style/AppThemeDark"
+            android:exported="false"
+            android:screenOrientation="sensorLandscape" />
+
         <activity android:name="com.winlator.ExternalControllerBindingsActivity"
             android:theme="@style/AppThemeDark"
             android:exported="false"

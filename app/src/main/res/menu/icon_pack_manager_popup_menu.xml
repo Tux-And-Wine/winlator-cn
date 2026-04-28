@@ -6,6 +6,11 @@
         android:icon="@drawable/icon_popup_menu_folder_open"
         android:iconTint="?attr/colorAccent" />
     <item
+        android:id="@+id/menu_item_create_icon_pack"
+        android:title="@string/create_icon_pack"
+        android:icon="@drawable/icon_add"
+        android:iconTint="?attr/colorAccent" />
+    <item
         android:id="@+id/menu_item_select_icon_pack"
         android:title="@string/select_icon_pack"
         android:icon="@drawable/icon_popup_menu_settings"

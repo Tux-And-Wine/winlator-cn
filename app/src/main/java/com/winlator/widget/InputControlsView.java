@@ -503,7 +503,10 @@ public class InputControlsView extends View {
                 if (isActionDown) createMouseMoveTimer();
             }
             else if (binding == Binding.MOUSE_SWAPL_R_BUTTONS) {
-                if (isActionDown && touchpadView != null) touchpadView.setSwapMouseButtons();
+                if (isActionDown && touchpadView != null) {
+                    touchpadView.setSwapMouseButtons();
+                    invalidate();
+                }
             }
             else if (binding == Binding.MOUSE_SHOW_INPUT_METHOD) {
                 if (isActionDown) AppUtils.showKeyboard((AppCompatActivity)getContext());

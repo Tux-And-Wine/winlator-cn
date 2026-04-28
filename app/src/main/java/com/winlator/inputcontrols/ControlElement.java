@@ -93,6 +93,9 @@ public class ControlElement {
     private byte iconId;
     private String customIconData = "";
     private Bitmap customIcon;
+    private byte secondaryIconId;
+    private String secondaryCustomIconData = "";
+    private Bitmap secondaryCustomIcon;
     private int pressedColor = 0xff000000;
     private float iconScale = 1.0f;
     private float iconOpacity = 1.0f;
@@ -149,6 +152,9 @@ public class ControlElement {
         iconId = 0;
         customIconData = "";
         customIcon = null;
+        secondaryIconId = 0;
+        secondaryCustomIconData = "";
+        secondaryCustomIcon = null;
         pressedColor = 0xff000000;
         iconScale = 1.0f;
         iconOpacity = 1.0f;
@@ -305,6 +311,14 @@ public class ControlElement {
         this.iconId = (byte)iconId;
     }
 
+    public byte getSecondaryIconId() {
+        return secondaryIconId;
+    }
+
+    public void setSecondaryIconId(int secondaryIconId) {
+        this.secondaryIconId = (byte)secondaryIconId;
+    }
+
     public boolean hasCustomIcon() {
         return customIconData != null && !customIconData.isEmpty();
     }
@@ -319,16 +333,66 @@ public class ControlElement {
     }
 
     public Bitmap getCustomIcon() {
-        if (customIcon == null && hasCustomIcon()) {
+        customIcon = decodeCustomIcon(customIconData, customIcon);
+        return customIcon;
+    }
+
+    public boolean hasSecondaryCustomIcon() {
+        return secondaryCustomIconData != null && !secondaryCustomIconData.isEmpty();
+    }
+
+    public String getSecondaryCustomIconData() {
+        return secondaryCustomIconData;
+    }
+
+    public void setSecondaryCustomIconData(String secondaryCustomIconData) {
+        this.secondaryCustomIconData = secondaryCustomIconData != null ? secondaryCustomIconData : "";
+        secondaryCustomIcon = null;
+    }
+
+    public Bitmap getSecondaryCustomIcon() {
+        secondaryCustomIcon = decodeCustomIcon(secondaryCustomIconData, secondaryCustomIcon);
+        return secondaryCustomIcon;
+    }
+
+    private Bitmap decodeCustomIcon(String iconData, Bitmap cachedIcon) {
+        if (cachedIcon == null && iconData != null && !iconData.isEmpty()) {
             try {
-                byte[] data = Base64.decode(customIconData, Base64.DEFAULT);
-                customIcon = BitmapFactory.decodeByteArray(data, 0, data.length);
+                byte[] data = Base64.decode(iconData, Base64.DEFAULT);
+                return BitmapFactory.decodeByteArray(data, 0, data.length);
             }
             catch (IllegalArgumentException e) {
-                customIconData = "";
+                return null;
             }
         }
-        return customIcon;
+        return cachedIcon;
+    }
+
+    public boolean hasBinding(Binding targetBinding) {
+        for (Binding binding : bindings) {
+            if (binding == targetBinding) return true;
+        }
+        return false;
+    }
+
+    private boolean isSecondaryIconActive() {
+        return type == Type.BUTTON &&
+            hasBinding(Binding.MOUSE_SWAPL_R_BUTTONS) &&
+            inputControlsView.getTouchpadView() != null &&
+            inputControlsView.getTouchpadView().isSwapMouseButtons() &&
+            (hasSecondaryCustomIcon() || secondaryIconId > 0);
+    }
+
+    private boolean hasVisibleIcon() {
+        return isSecondaryIconActive() ? hasSecondaryCustomIcon() || secondaryIconId > 0 : hasCustomIcon() || iconId > 0;
+    }
+
+    private Bitmap getVisibleCustomIcon() {
+        return isSecondaryIconActive() ? getSecondaryCustomIcon() : getCustomIcon();
+    }
+
+    private byte getVisibleIconId() {
+        return isSecondaryIconActive() ? secondaryIconId : iconId;
     }
 
     public int getPressedColor() {
@@ -553,8 +617,8 @@ public class ControlElement {
                     }
                 }
 
-                if (hasCustomIcon() || iconId > 0) {
-                    drawIcon(canvas, cx, cy, boundingBox.width(), boundingBox.height(), iconId, true);
+                if (hasVisibleIcon()) {
+                    drawIcon(canvas, cx, cy, boundingBox.width(), boundingBox.height(), getVisibleIconId(), getVisibleCustomIcon(), true);
                 }
                 else {
                     String text = getDisplayText();
@@ -830,7 +894,7 @@ public class ControlElement {
                         startAngle = endAngle;
                     }
 
-                    drawIcon(canvas, cx, cy, boundingBox.width() * 0.4f, boundingBox.width() * 0.4f, 17, false);
+                    drawIcon(canvas, cx, cy, boundingBox.width() * 0.4f, boundingBox.width() * 0.4f, 17, null, false);
                 }
                 else {
                     paint.setStyle(Paint.Style.FILL_AND_STROKE);
@@ -846,9 +910,9 @@ public class ControlElement {
         }
     }
 
-    private void drawIcon(Canvas canvas, float cx, float cy, float width, float height, int iconId, boolean automargin) {
+    private void drawIcon(Canvas canvas, float cx, float cy, float width, float height, int iconId, Bitmap customIcon, boolean automargin) {
         Paint paint = inputControlsView.getPaint();
-        Bitmap icon = getCustomIcon();
+        Bitmap icon = customIcon;
         boolean isCustomIcon = icon != null;
         if (icon == null && iconId > 0) icon = inputControlsView.getIcon((byte)iconId);
         if (icon == null) return;
@@ -886,6 +950,8 @@ public class ControlElement {
             elementJSONObject.put("text", text);
             elementJSONObject.put("iconId", iconId);
             if (hasCustomIcon()) elementJSONObject.put("customIconData", customIconData);
+            if (secondaryIconId > 0) elementJSONObject.put("secondaryIconId", secondaryIconId);
+            if (hasSecondaryCustomIcon()) elementJSONObject.put("secondaryCustomIconData", secondaryCustomIconData);
             if (pressedColor != 0xff000000) elementJSONObject.put("pressedColor", pressedColor);
             if (iconScale != 1.0f) elementJSONObject.put("iconScale", Float.valueOf(iconScale));
             if (iconOpacity != 1.0f) elementJSONObject.put("iconOpacity", Float.valueOf(iconOpacity));
@@ -1216,8 +1282,10 @@ public class ControlElement {
     private void pressTrackpadPointerButton() {
         if (trackpadPressBinding == Binding.NONE || inputControlsView.getXServer() == null) return;
 
-        int centerX = Mathf.clamp(inputControlsView.getMaxWidth() / 2 + trackpadPressOffsetX, 0, Math.max(0, inputControlsView.getMaxWidth() - 1));
-        int centerY = Mathf.clamp(inputControlsView.getMaxHeight() / 2 + trackpadPressOffsetY, 0, Math.max(0, inputControlsView.getMaxHeight() - 1));
+        int screenWidth = inputControlsView.getXServer().screenInfo.width;
+        int screenHeight = inputControlsView.getXServer().screenInfo.height;
+        int centerX = Mathf.clamp(screenWidth / 2 + trackpadPressOffsetX, 0, Math.max(0, screenWidth - 1));
+        int centerY = Mathf.clamp(screenHeight / 2 + trackpadPressOffsetY, 0, Math.max(0, screenHeight - 1));
         inputControlsView.getXServer().injectPointerMove(centerX, centerY);
         inputControlsView.handleInputEvent(trackpadPressBinding, true);
     }

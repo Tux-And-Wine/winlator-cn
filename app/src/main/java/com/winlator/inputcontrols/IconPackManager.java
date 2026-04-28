@@ -76,6 +76,20 @@ public class IconPackManager {
         }
     }
 
+    public static class SourceIcon {
+        public final String name;
+        public final String path;
+        public final int scaleType;
+        public final byte[] bytes;
+
+        public SourceIcon(String name, String path, int scaleType, byte[] bytes) {
+            this.name = name != null ? name : "";
+            this.path = path != null ? path : "";
+            this.scaleType = scaleType;
+            this.bytes = bytes;
+        }
+    }
+
     private final Context context;
     private final SharedPreferences preferences;
 
@@ -107,6 +121,11 @@ public class IconPackManager {
         String activePackId = getActivePackId();
         if (activePackId == null || activePackId.isEmpty()) return null;
         return loadPack(new File(getIconPacksDir(context), activePackId));
+    }
+
+    public StoredIconPack getPack(String packId) {
+        if (packId == null || packId.isEmpty()) return null;
+        return loadPack(new File(getIconPacksDir(context), packId));
     }
 
     public String getActivePackId() {
@@ -204,21 +223,82 @@ public class IconPackManager {
         return storedIconPack;
     }
 
-    public boolean exportPack(StoredIconPack pack, Uri uri) throws IOException {
-        if (pack == null) return false;
-
+    public StoredIconPack createPack(String packName, String author, List<SourceIcon> sourceIcons) throws IOException, JSONException {
         IconPack iconPack = new IconPack();
-        iconPack.name = pack.name;
-        iconPack.author = pack.author;
-        iconPack.isEnabled = pack.enabled;
+        iconPack.name = packName != null && !packName.trim().isEmpty() ? packName.trim() : "Icon Pack";
+        iconPack.author = author != null ? author.trim() : "";
+        iconPack.isEnabled = true;
         iconPack.icons = new ArrayList<>();
-        iconPack.customIcon = toSerializableIcon(pack.customIcon);
 
-        for (PackIcon packIcon : pack.icons) {
-            Icon icon = toSerializableIcon(packIcon);
+        if (sourceIcons != null) for (SourceIcon sourceIcon : sourceIcons) {
+            Icon icon = toSerializableIcon(sourceIcon);
             if (icon != null) iconPack.icons.add(icon);
         }
 
+        byte[] bytes = serializeIconPack(iconPack);
+        iconPack.packSize = bytes.length;
+        return importPack(iconPack);
+    }
+
+    public StoredIconPack addIcons(String packId, List<SourceIcon> sourceIcons) throws IOException, JSONException {
+        if (packId == null || packId.isEmpty() || sourceIcons == null || sourceIcons.isEmpty()) return getPack(packId);
+
+        File dir = new File(getIconPacksDir(context), packId);
+        JSONObject metadata = readMetadata(dir);
+        if (metadata == null) return null;
+
+        JSONArray iconsJSONArray = metadata.optJSONArray("icons");
+        if (iconsJSONArray == null) iconsJSONArray = new JSONArray();
+
+        int nextFileIndex = iconsJSONArray.length();
+        for (SourceIcon sourceIcon : sourceIcons) {
+            if (sourceIcon == null || sourceIcon.bytes == null || sourceIcon.bytes.length == 0) continue;
+
+            String filename = generateNextIconFilename(dir, nextFileIndex++);
+            FileUtils.write(new File(dir, filename), sourceIcon.bytes);
+
+            JSONObject iconJSONObject = new JSONObject();
+            iconJSONObject.put("name", sourceIcon.name);
+            iconJSONObject.put("path", sourceIcon.path);
+            iconJSONObject.put("scaleType", sourceIcon.scaleType);
+            iconJSONObject.put("fileName", filename);
+            iconsJSONArray.put(iconJSONObject);
+        }
+
+        metadata.put("icons", iconsJSONArray);
+        return writeMetadataAndLoadPack(dir, metadata);
+    }
+
+    public StoredIconPack removeIcon(String packId, int iconIndex) throws IOException, JSONException {
+        if (packId == null || packId.isEmpty() || iconIndex < 0) return getPack(packId);
+
+        File dir = new File(getIconPacksDir(context), packId);
+        JSONObject metadata = readMetadata(dir);
+        if (metadata == null) return null;
+
+        JSONArray iconsJSONArray = metadata.optJSONArray("icons");
+        if (iconsJSONArray == null || iconIndex >= iconsJSONArray.length()) return getPack(packId);
+
+        JSONObject iconJSONObject = iconsJSONArray.optJSONObject(iconIndex);
+        if (iconJSONObject != null) {
+            String fileName = iconJSONObject.optString("fileName", "");
+            if (!fileName.isEmpty()) FileUtils.delete(new File(dir, fileName));
+        }
+
+        JSONArray updatedIconsJSONArray = new JSONArray();
+        for (int i = 0; i < iconsJSONArray.length(); i++) {
+            if (i == iconIndex) continue;
+            updatedIconsJSONArray.put(iconsJSONArray.getJSONObject(i));
+        }
+
+        metadata.put("icons", updatedIconsJSONArray);
+        return writeMetadataAndLoadPack(dir, metadata);
+    }
+
+    public boolean exportPack(StoredIconPack pack, Uri uri) throws IOException {
+        if (pack == null) return false;
+
+        IconPack iconPack = toSerializablePack(pack);
         byte[] bytes = serializeIconPack(iconPack);
         iconPack.packSize = bytes.length;
         bytes = serializeIconPack(iconPack);
@@ -286,6 +366,34 @@ public class IconPackManager {
         }
     }
 
+    private JSONObject readMetadata(File dir) throws JSONException {
+        File metadataFile = new File(dir, METADATA_FILENAME);
+        if (!metadataFile.isFile()) return null;
+        return new JSONObject(FileUtils.readString(metadataFile));
+    }
+
+    private StoredIconPack writeMetadataAndLoadPack(File dir, JSONObject metadata) throws IOException, JSONException {
+        File metadataFile = new File(dir, METADATA_FILENAME);
+        metadata.put("id", metadata.optString("id", dir.getName()));
+        FileUtils.writeString(metadataFile, metadata.toString());
+
+        StoredIconPack storedIconPack = loadPack(dir);
+        long packSize = calculatePackSize(storedIconPack);
+        metadata.put("packSize", packSize);
+        FileUtils.writeString(metadataFile, metadata.toString());
+        return loadPack(dir);
+    }
+
+    private String generateNextIconFilename(File dir, int startIndex) {
+        int index = Math.max(startIndex, 0);
+        File file;
+        do {
+            file = new File(dir, String.format("%03d.bin", index++));
+        }
+        while (file.exists());
+        return file.getName();
+    }
+
     private static Icon toSerializableIcon(PackIcon packIcon) {
         if (packIcon == null) return null;
         byte[] bytes = packIcon.readBytes();
@@ -300,6 +408,43 @@ public class IconPackManager {
         icon.name = packIcon.name;
         icon.path = packIcon.path;
         return icon;
+    }
+
+    private static Icon toSerializableIcon(SourceIcon sourceIcon) {
+        if (sourceIcon == null || sourceIcon.bytes == null || sourceIcon.bytes.length == 0) return null;
+
+        BitmapData bitmapData = new BitmapData();
+        bitmapData.binData = sourceIcon.bytes;
+
+        Icon icon = new Icon();
+        icon.scaleType = sourceIcon.scaleType;
+        icon.bmpData = bitmapData;
+        icon.name = sourceIcon.name;
+        icon.path = sourceIcon.path;
+        return icon;
+    }
+
+    private static IconPack toSerializablePack(StoredIconPack pack) {
+        IconPack iconPack = new IconPack();
+        iconPack.name = pack.name;
+        iconPack.author = pack.author;
+        iconPack.isEnabled = pack.enabled;
+        iconPack.icons = new ArrayList<>();
+        iconPack.customIcon = toSerializableIcon(pack.customIcon);
+
+        for (PackIcon packIcon : pack.icons) {
+            Icon icon = toSerializableIcon(packIcon);
+            if (icon != null) iconPack.icons.add(icon);
+        }
+        return iconPack;
+    }
+
+    private static long calculatePackSize(StoredIconPack pack) throws IOException {
+        if (pack == null) return 0;
+        IconPack iconPack = toSerializablePack(pack);
+        byte[] bytes = serializeIconPack(iconPack);
+        iconPack.packSize = bytes.length;
+        return serializeIconPack(iconPack).length;
     }
 
     private static byte[] serializeIconPack(IconPack iconPack) throws IOException {
