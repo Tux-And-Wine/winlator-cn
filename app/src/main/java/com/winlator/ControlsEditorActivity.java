@@ -55,6 +55,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 
 public class ControlsEditorActivity extends AppCompatActivity implements View.OnClickListener {
     private static final int ICON_SLOT_PRIMARY = 0;
@@ -730,8 +731,7 @@ public class ControlsEditorActivity extends AppCompatActivity implements View.On
             parent.addView(imageView);
         }
 
-        IconPackManager.StoredIconPack activePack = iconPackManager.getActivePack();
-        if (activePack != null) {
+        for (IconPackManager.StoredIconPack activePack : iconPackManager.getActivePacks()) {
             for (final IconPackManager.PackIcon packIcon : activePack.icons) {
                 final byte[] iconData = packIcon.readBytes();
                 if (iconData == null || iconData.length == 0) continue;
@@ -884,18 +884,24 @@ public class ControlsEditorActivity extends AppCompatActivity implements View.On
         items[0] = getString(R.string.icon_pack_none);
         for (int i = 0; i < packs.size(); i++) items[i + 1] = packs.get(i).name;
 
-        ContentDialog.showSelectionList(this, R.string.select_icon_pack, items, false, (positions) -> {
-            if (positions.isEmpty()) return;
-            int position = positions.get(0);
-            if (position == 0) {
-                iconPackManager.setActivePackId(null);
-                AppUtils.showToast(this, R.string.icon_pack_disabled);
+        ContentDialog.showSelectionList(this, R.string.select_icon_pack, items, true, (positions) -> {
+            LinkedHashSet<String> selectedPackIds = new LinkedHashSet<>();
+            boolean disableAll = false;
+
+            for (Integer position : positions) {
+                if (position == null) continue;
+                if (position == 0) {
+                    disableAll = true;
+                    break;
+                }
+
+                int packIndex = position - 1;
+                if (packIndex >= 0 && packIndex < packs.size()) selectedPackIds.add(packs.get(packIndex).id);
             }
-            else {
-                IconPackManager.StoredIconPack pack = packs.get(position - 1);
-                iconPackManager.setActivePackId(pack.id);
-                AppUtils.showToast(this, getString(R.string.icon_pack_selected, pack.name));
-            }
+
+            iconPackManager.setActivePackIds(disableAll ? new LinkedHashSet<>() : selectedPackIds);
+            if (disableAll || selectedPackIds.isEmpty()) AppUtils.showToast(this, R.string.icon_pack_disabled);
+            else AppUtils.showToast(this, getString(R.string.icon_packs_selected, selectedPackIds.size()));
             refreshEditingIconList();
         });
     }

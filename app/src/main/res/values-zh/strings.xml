@@ -105,6 +105,7 @@
     <string name="icon_pack_created">已创建图标包：%1$s</string>
     <string name="icon_pack_exported">已导出图标包：%1$s</string>
     <string name="icon_pack_selected">已选择图标包：%1$s</string>
+    <string name="icon_packs_selected">已启用 %1$d 个图标包</string>
     <string name="icon_pack_removed">已删除图标包：%1$s</string>
     <string name="icon_pack_manager">图标包管理器</string>
     <string name="icon_pack_found_count">找到 %1$d 包</string>

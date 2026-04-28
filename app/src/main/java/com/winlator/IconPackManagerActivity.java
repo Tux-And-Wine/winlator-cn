@@ -184,9 +184,8 @@ public class IconPackManagerActivity extends AppCompatActivity {
     }
 
     private void togglePackEnabled(IconPackManager.StoredIconPack pack) {
-        String activePackId = iconPackManager.getActivePackId();
-        boolean isActive = pack.id.equals(activePackId);
-        iconPackManager.setActivePackId(isActive ? null : pack.id);
+        boolean isActive = iconPackManager.isPackEnabled(pack.id);
+        iconPackManager.setPackEnabled(pack.id, !isActive);
         AppUtils.showToast(this, isActive ? getString(R.string.icon_pack_disabled) : getString(R.string.icon_pack_selected, pack.name));
         refreshPacks();
     }
@@ -229,8 +228,7 @@ public class IconPackManagerActivity extends AppCompatActivity {
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
             IconPackManager.StoredIconPack pack = packs.get(position);
-            String activePackId = iconPackManager.getActivePackId();
-            boolean isActive = pack.id.equals(activePackId);
+            boolean isActive = iconPackManager.isPackEnabled(pack.id);
 
             holder.nameTextView.setText(pack.name);
             holder.metaTextView.setText(buildPackMeta(pack));

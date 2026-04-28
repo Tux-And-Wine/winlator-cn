@@ -110,6 +110,7 @@
     <string name="icon_pack_created">Created icon pack: %1$s</string>
     <string name="icon_pack_exported">Exported icon pack: %1$s</string>
     <string name="icon_pack_selected">Selected icon pack: %1$s</string>
+    <string name="icon_packs_selected">Enabled %1$d icon packs</string>
     <string name="icon_pack_removed">Removed icon pack: %1$s</string>
     <string name="icon_pack_manager">Icon Pack Manager</string>
     <string name="icon_pack_found_count">Found %1$d packs</string>

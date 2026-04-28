@@ -29,11 +29,14 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 public class IconPackManager {
     private static final byte[] JAVA_SERIALIZATION_HEADER = {(byte)0xAC, (byte)0xED, 0x00, 0x05};
     private static final String PREF_ACTIVE_PACK_ID = "controls_editor_active_icon_pack_id";
+    private static final String PREF_ACTIVE_PACK_IDS = "controls_editor_active_icon_pack_ids";
     private static final String METADATA_FILENAME = "metadata.json";
 
     public static class PackIcon {
@@ -118,9 +121,19 @@ public class IconPackManager {
     }
 
     public StoredIconPack getActivePack() {
-        String activePackId = getActivePackId();
-        if (activePackId == null || activePackId.isEmpty()) return null;
-        return loadPack(new File(getIconPacksDir(context), activePackId));
+        ArrayList<StoredIconPack> activePacks = getActivePacks();
+        return activePacks.isEmpty() ? null : activePacks.get(0);
+    }
+
+    public ArrayList<StoredIconPack> getActivePacks() {
+        Set<String> activePackIds = getActivePackIds();
+        ArrayList<StoredIconPack> activePacks = new ArrayList<>();
+        if (activePackIds.isEmpty()) return activePacks;
+
+        for (StoredIconPack pack : getPacks()) {
+            if (activePackIds.contains(pack.id)) activePacks.add(pack);
+        }
+        return activePacks;
     }
 
     public StoredIconPack getPack(String packId) {
@@ -129,11 +142,57 @@ public class IconPackManager {
     }
 
     public String getActivePackId() {
-        return preferences.getString(PREF_ACTIVE_PACK_ID, null);
+        for (String packId : getActivePackIds()) return packId;
+        return null;
+    }
+
+    public Set<String> getActivePackIds() {
+        LinkedHashSet<String> activePackIds = new LinkedHashSet<>();
+
+        Set<String> storedPackIds = preferences.getStringSet(PREF_ACTIVE_PACK_IDS, null);
+        if (storedPackIds != null) activePackIds.addAll(storedPackIds);
+        else {
+            String legacyPackId = preferences.getString(PREF_ACTIVE_PACK_ID, null);
+            if (legacyPackId != null && !legacyPackId.isEmpty()) {
+                activePackIds.add(legacyPackId);
+                setActivePackIds(activePackIds);
+            }
+        }
+
+        return activePackIds;
     }
 
     public void setActivePackId(String packId) {
-        preferences.edit().putString(PREF_ACTIVE_PACK_ID, packId).apply();
+        LinkedHashSet<String> activePackIds = new LinkedHashSet<>();
+        if (packId != null && !packId.isEmpty()) activePackIds.add(packId);
+        setActivePackIds(activePackIds);
+    }
+
+    public void setActivePackIds(Set<String> packIds) {
+        LinkedHashSet<String> activePackIds = new LinkedHashSet<>();
+        if (packIds != null) {
+            for (String packId : packIds) {
+                if (packId != null && !packId.isEmpty()) activePackIds.add(packId);
+            }
+        }
+
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putStringSet(PREF_ACTIVE_PACK_IDS, activePackIds);
+        editor.putString(PREF_ACTIVE_PACK_ID, activePackIds.isEmpty() ? null : activePackIds.iterator().next());
+        editor.apply();
+    }
+
+    public boolean isPackEnabled(String packId) {
+        return packId != null && getActivePackIds().contains(packId);
+    }
+
+    public void setPackEnabled(String packId, boolean enabled) {
+        if (packId == null || packId.isEmpty()) return;
+
+        LinkedHashSet<String> activePackIds = new LinkedHashSet<>(getActivePackIds());
+        if (enabled) activePackIds.add(packId);
+        else activePackIds.remove(packId);
+        setActivePackIds(activePackIds);
     }
 
     public StoredIconPack importPack(Uri uri) throws IOException, ClassNotFoundException, JSONException {
@@ -219,7 +278,7 @@ public class IconPackManager {
 
         FileUtils.writeString(new File(dir, METADATA_FILENAME), metadata.toString());
         StoredIconPack storedIconPack = loadPack(dir);
-        setActivePackId(storedIconPack != null ? storedIconPack.id : null);
+        if (storedIconPack != null) setPackEnabled(storedIconPack.id, true);
         return storedIconPack;
     }
 
@@ -313,7 +372,7 @@ public class IconPackManager {
 
     public boolean removePack(String packId) {
         if (packId == null || packId.isEmpty()) return false;
-        if (packId.equals(getActivePackId())) setActivePackId(null);
+        setPackEnabled(packId, false);
         return FileUtils.delete(new File(getIconPacksDir(context), packId));
     }
 
