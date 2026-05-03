@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -38,6 +39,10 @@ import com.winlator.inputcontrols.ExternalController;
 import com.winlator.inputcontrols.InputControlsManager;
 import com.winlator.widget.InputControlsView;
 import com.winlator.widget.SeekBar;
+import com.winlator.widget.TouchpadView;
+
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -120,6 +125,20 @@ public class InputControlsFragment extends Fragment {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (currentProfile != null) {
                     currentProfile.setTouchpadMode((byte)position);
+                    // Apply mode-specific defaults
+                    if (position == TouchpadView.TOUCHPAD_MODE_V2) {
+                        currentProfile.setTwoFingersDrag(false);
+                        currentProfile.setTwoFingersRightClick(false);
+                        currentProfile.setLongPressRightClick(true);
+                        currentProfile.setPinchZoomEnabled(true);
+                        currentProfile.setShortDragEnabled(true);
+                    } else {
+                        currentProfile.setTwoFingersDrag(true);
+                        currentProfile.setTwoFingersRightClick(true);
+                        currentProfile.setLongPressRightClick(true);
+                        currentProfile.setPinchZoomEnabled(false);
+                        currentProfile.setShortDragEnabled(false);
+                    }
                     currentProfile.save();
                 }
             }
@@ -135,6 +154,8 @@ public class InputControlsFragment extends Fragment {
                 currentProfile.save();
             }
         });
+
+        view.findViewById(R.id.BTTouchpadSettings).setOnClickListener((v) -> showTouchpadSettingsDialog());
 
         updateLayout = () -> {
             if (currentProfile != null) {
@@ -372,5 +393,69 @@ public class InputControlsFragment extends Fragment {
             }
         }
         else view.findViewById(R.id.TVEmptyText).setVisibility(View.VISIBLE);
+    }
+
+    private void showTouchpadSettingsDialog() {
+        if (currentProfile == null) {
+            AppUtils.showToast(getContext(), R.string.no_profile_selected);
+            return;
+        }
+
+        Context context = getContext();
+        BottomSheetDialog dialog = new BottomSheetDialog(context);
+        View dialogView = LayoutInflater.from(context).inflate(R.layout.touchpad_settings_dialog, null);
+        dialog.setContentView(dialogView);
+
+        byte mode = currentProfile.getTouchpadMode();
+        String[] modeNames = getResources().getStringArray(R.array.touchpad_mode_entries);
+        String title = mode < modeNames.length ? modeNames[mode] + " " + getString(R.string.settings) : getString(R.string.settings);
+        ((TextView) dialogView.findViewById(R.id.TVTouchpadSettingsTitle)).setText(title);
+
+        CheckBox cbTwoFingersDrag = dialogView.findViewById(R.id.CBTwoFingersDrag);
+        CheckBox cbTwoFingersRightClick = dialogView.findViewById(R.id.CBTwoFingersRightClick);
+        CheckBox cbLongPressRightClick = dialogView.findViewById(R.id.CBLongPressRightClick);
+        CheckBox cbPinchZoomEnabled = dialogView.findViewById(R.id.CBPinchZoomEnabled);
+        CheckBox cbShortDragEnabled = dialogView.findViewById(R.id.CBShortDragEnabled);
+
+        cbTwoFingersDrag.setChecked(currentProfile.isTwoFingersDrag());
+        cbTwoFingersRightClick.setChecked(currentProfile.isTwoFingersRightClick());
+        cbLongPressRightClick.setChecked(currentProfile.isLongPressRightClick());
+        cbPinchZoomEnabled.setChecked(currentProfile.isPinchZoomEnabled());
+        cbShortDragEnabled.setChecked(currentProfile.isShortDragEnabled());
+
+        cbTwoFingersDrag.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            currentProfile.setTwoFingersDrag(isChecked);
+            currentProfile.save();
+        });
+
+        cbTwoFingersRightClick.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            currentProfile.setTwoFingersRightClick(isChecked);
+            currentProfile.save();
+        });
+
+        cbLongPressRightClick.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            currentProfile.setLongPressRightClick(isChecked);
+            currentProfile.save();
+        });
+
+        cbPinchZoomEnabled.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            currentProfile.setPinchZoomEnabled(isChecked);
+            currentProfile.save();
+        });
+
+        cbShortDragEnabled.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            currentProfile.setShortDragEnabled(isChecked);
+            currentProfile.save();
+        });
+
+        dialog.show();
+
+        // 强制底部弹窗展开更多内容
+        FrameLayout bottomSheet = dialog.findViewById(com.google.android.material.R.id.design_bottom_sheet);
+        if (bottomSheet != null) {
+            BottomSheetBehavior<FrameLayout> behavior = BottomSheetBehavior.from(bottomSheet);
+            behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+            behavior.setPeekHeight(0);
+        }
     }
 }
