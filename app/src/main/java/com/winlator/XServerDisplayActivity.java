@@ -571,7 +571,7 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
             if (!envVars.has("WINEESYNC")) envVars.put("WINEESYNC", "1");
 
             guestProgramLauncherComponent.setBox64Preset(shortcut != null ? shortcut.getExtra("box64Preset", container.getBox64Preset()) : container.getBox64Preset());
-            guestProgramLauncherComponent.setBox64Version(container.getBox64Version());
+            guestProgramLauncherComponent.setBox64Version(shortcut != null ? shortcut.getExtra("box64Version", container.getBox64Version()) : container.getBox64Version());
         }
 
         environment = new XEnvironment(this, rootFS);
@@ -640,6 +640,7 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
         renderer.setCursorColor(preferences.getInt("cursor_color", 0xffffff));
         renderer.setCursorScale(preferences.getFloat("cursor_scale", 1.0f));
         renderer.setForceWindowsFullscreen(shortcut != null && shortcut.getExtra("forceFullscreen", "0").equals("1"));
+        final boolean startFullscreen = shortcut != null && shortcut.getExtra("toggleFullscreen", "0").equals("1");
 
         xServer.setRenderer(renderer);
         rootView.addView(xServerView);
@@ -652,6 +653,11 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
             if (!drawerLayout.isDrawerOpen(GravityCompat.START)) drawerLayout.openDrawer(GravityCompat.START);
         });
         rootView.addView(touchpadView);
+
+        if (startFullscreen) {
+            renderer.toggleFullscreen();
+            touchpadView.toggleFullscreen();
+        }
 
         inputControlsView = new InputControlsView(this);
         inputControlsView.setOverlayOpacity(preferences.getFloat("overlay_opacity", InputControlsView.DEFAULT_OVERLAY_OPACITY));
