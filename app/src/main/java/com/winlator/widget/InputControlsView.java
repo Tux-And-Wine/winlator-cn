@@ -67,6 +67,7 @@ public class InputControlsView extends View {
     private final Bitmap[] icons = new Bitmap[18];
     private Timer mouseMoveTimer;
     private final PointF mouseMoveOffset = new PointF();
+    private final HashMap<Binding, Integer> activeBindingCounts = new HashMap<>();
     private boolean showTouchscreenControls = true;
     private boolean touchHapticFeedbackEnabled = false;
     private Vibrator vibrator;
@@ -500,6 +501,8 @@ public class InputControlsView extends View {
     }
 
     public void handleInputEvent(Binding binding, boolean isActionDown, float offset) {
+        if (binding == Binding.NONE) return;
+
         if (binding.isGamepad()) {
             WinHandler winHandler = xServer != null ? xServer.getWinHandler() : null;
             GamepadState state = profile.getGamepadState();
@@ -547,6 +550,9 @@ public class InputControlsView extends View {
             }
             else {
                 Pointer.Button pointerButton = binding.getPointerButton();
+                boolean shouldDispatch = updateActiveBindingCount(binding, isActionDown);
+                if (!shouldDispatch) return;
+
                 if (isActionDown) {
                     if (pointerButton != null) {
                         xServer.injectPointerButtonPress(pointerButton);
@@ -561,6 +567,24 @@ public class InputControlsView extends View {
                 }
             }
         }
+    }
+
+    private boolean updateActiveBindingCount(Binding binding, boolean isActionDown) {
+        Integer count = activeBindingCounts.get(binding);
+        int currentCount = count != null ? count : 0;
+
+        if (isActionDown) {
+            activeBindingCounts.put(binding, currentCount + 1);
+            return currentCount == 0;
+        }
+
+        if (currentCount <= 1) {
+            activeBindingCounts.remove(binding);
+            return currentCount == 1;
+        }
+
+        activeBindingCounts.put(binding, currentCount - 1);
+        return false;
     }
 
     public Bitmap getIcon(byte id) {

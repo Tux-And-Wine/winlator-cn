@@ -1121,7 +1121,7 @@ public class ControlElement {
                     }
                     else {
                         boolean state = binding.isMouseMove() ? (states[i] || states[(i+2)%4]) : states[i];
-                        inputControlsView.handleInputEvent(binding, state, value);
+                        if (binding.isMouseMove() || this.states[i] != state) inputControlsView.handleInputEvent(binding, state, value);
                         this.states[i] = state;
                     }
                 }
@@ -1153,7 +1153,7 @@ public class ControlElement {
                             cursorDy = Mathf.roundPoint(value);
                         }
                         else {
-                            inputControlsView.handleInputEvent(binding, states[i], value);
+                            if (this.states[i] != states[i]) inputControlsView.handleInputEvent(binding, states[i], value);
                             this.states[i] = states[i];
                         }
                     }
@@ -1168,7 +1168,7 @@ public class ControlElement {
                     float value = i == 1 || i == 3 ? deltaX : deltaY;
                     Binding binding = getBindingAt(i);
                     boolean state = binding.isMouseMove() ? (states[i] || states[(i+2)%4]) : states[i];
-                    inputControlsView.handleInputEvent(binding, state, value);
+                    if (binding.isMouseMove() || this.states[i] != state) inputControlsView.handleInputEvent(binding, state, value);
                     this.states[i] = state;
                 }
             }
