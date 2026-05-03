@@ -188,6 +188,7 @@
     <string name="removing_files">Удаление файлов...</string>
     <string name="disable_mouse_input">Отключить ввод с помощью мыши</string>
     <string name="move_cursor_to_touchpoint">Переместите курсор в точку касания</string>
+    <string name="pinch_zoom">Масштабирование двумя пальцами</string>
     <string name="sync_every_frame">Синхронизируйте каждый кадр</string>
     <string name="dpi_font_size">DPI (Размер шрифта)</string>
     <string name="preferred_input_api">Предпочтительный API ввода</string>

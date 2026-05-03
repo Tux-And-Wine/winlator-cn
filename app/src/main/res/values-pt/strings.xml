@@ -188,6 +188,7 @@
     <string name="removing_files">Removendo Arquivos...</string>
     <string name="disable_mouse_input">Desativar Entrada do Mouse</string>
     <string name="move_cursor_to_touchpoint">Mover o cursor para o ponto de toque</string>
+    <string name="pinch_zoom">Zoom com dois dedos</string>
     <string name="sync_every_frame">Sincronizar cada quadro</string>
     <string name="dpi_font_size">DPI (Tamanho da Fonte)</string>
     <string name="preferred_input_api">API de Entrada Preferida</string>
