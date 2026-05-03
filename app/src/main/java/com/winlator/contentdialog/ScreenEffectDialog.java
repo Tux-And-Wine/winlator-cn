@@ -45,15 +45,22 @@ public class ScreenEffectDialog extends ContentDialog {
         setIcon(R.drawable.icon_screen_effect);
 
         LinearLayout llContent = findViewById(R.id.LLContent);
+        LinearLayout llColorAdjustment = findViewById(R.id.LLColorAdjustment);
+        LinearLayout llProfileSettings = findViewById(R.id.LLProfileSettings);
         FrameLayout frameLayout = findViewById(R.id.FrameLayout);
         View vSeparator = findViewById(R.id.VSeparator);
         int orientation = activity.getResources().getConfiguration().orientation;
         if (orientation == Configuration.ORIENTATION_PORTRAIT) {
             llContent.setOrientation(LinearLayout.VERTICAL);
             vSeparator.setVisibility(View.GONE);
+            llColorAdjustment.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+            llProfileSettings.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
             frameLayout.getLayoutParams().width = AppUtils.getPreferredDialogWidth(activity);
         } else {
+            llContent.setOrientation(LinearLayout.HORIZONTAL);
             vSeparator.setVisibility(View.VISIBLE);
+            llColorAdjustment.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+            llProfileSettings.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
             frameLayout.getLayoutParams().width = (int)UnitUtils.dpToPx(520);
         }
 
