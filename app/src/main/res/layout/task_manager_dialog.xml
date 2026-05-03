@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
+    android:id="@+id/LLRoot"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal">
+    android:orientation="vertical">
 
     <LinearLayout
-        android:layout_width="430dp"
-        android:layout_height="match_parent"
+        android:id="@+id/LLProcessContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="200dp"
         android:orientation="vertical"
         android:background="@drawable/bordered_panel">
 
@@ -74,9 +77,10 @@
     </LinearLayout>
 
     <ScrollView
-        android:layout_width="145dp"
+        android:id="@+id/SVPanelList"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="8dp">
+        android:layout_marginTop="8dp">
 
         <LinearLayout
             android:id="@+id/LLPanelList"

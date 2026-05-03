@@ -1,11 +1,15 @@
 package com.winlator.contentdialog;
 
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 
 import androidx.preference.PreferenceManager;
@@ -14,6 +18,7 @@ import com.winlator.R;
 import com.winlator.XServerDisplayActivity;
 import com.winlator.core.AppUtils;
 import com.winlator.core.KeyValueSet;
+import com.winlator.core.UnitUtils;
 import com.winlator.renderer.GLRenderer;
 import com.winlator.renderer.effects.CRTEffect;
 import com.winlator.renderer.effects.ColorEffect;
@@ -38,6 +43,19 @@ public class ScreenEffectDialog extends ContentDialog {
         this.activity = activity;
         setTitle(R.string.screen_effect);
         setIcon(R.drawable.icon_screen_effect);
+
+        LinearLayout llContent = findViewById(R.id.LLContent);
+        FrameLayout frameLayout = findViewById(R.id.FrameLayout);
+        View vSeparator = findViewById(R.id.VSeparator);
+        int orientation = activity.getResources().getConfiguration().orientation;
+        if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+            llContent.setOrientation(LinearLayout.VERTICAL);
+            vSeparator.setVisibility(View.GONE);
+            frameLayout.getLayoutParams().width = AppUtils.getPreferredDialogWidth(activity);
+        } else {
+            vSeparator.setVisibility(View.VISIBLE);
+            frameLayout.getLayoutParams().width = (int)UnitUtils.dpToPx(520);
+        }
 
         preferences = PreferenceManager.getDefaultSharedPreferences(activity);
 

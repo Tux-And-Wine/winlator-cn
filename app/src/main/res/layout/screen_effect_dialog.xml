@@ -6,7 +6,8 @@
     android:orientation="vertical">
 
     <LinearLayout
-        android:layout_width="520dp"
+        android:id="@+id/LLContent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
@@ -66,7 +67,7 @@
             </FrameLayout>
         </LinearLayout>
 
-        <View style="@style/VerticalLine" />
+        <View android:id="@+id/VSeparator" style="@style/VerticalLine" />
 
         <LinearLayout
             android:layout_width="0dp"
