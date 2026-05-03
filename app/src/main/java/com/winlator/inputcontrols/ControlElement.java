@@ -218,10 +218,16 @@ public class ControlElement {
             propertyFlags.set(FLAG_BOUNDING_BOX_NEEDS_UPDATE);
         }
         bindings[index] = binding;
+        if (binding == Binding.MOUSE_SWAPL_R_BUTTONS && iconId == 0) {
+            iconId = 12;
+        }
     }
 
     public void setBinding(Binding binding) {
         Arrays.fill(bindings, binding);
+        if (binding == Binding.MOUSE_SWAPL_R_BUTTONS && iconId == 0) {
+            iconId = 12;
+        }
     }
 
     public float getScale() {
@@ -349,6 +355,18 @@ public class ControlElement {
         return boundingBox;
     }
 
+    private boolean isSwapMouseButtons() {
+        TouchpadView touchpadView = inputControlsView.getTouchpadView();
+        return touchpadView != null && touchpadView.isSwapMouseButtons();
+    }
+
+    private byte getEffectiveIconId() {
+        if (iconId > 0 && bindings[0] == Binding.MOUSE_SWAPL_R_BUTTONS) {
+            return (byte)(isSwapMouseButtons() ? 13 : 12);
+        }
+        return iconId;
+    }
+
     private String getBindingTextAt(int index) {
         Binding binding = getBindingAt(index);
         String text = binding.toString().replace("NUMPAD ", "NP").replace("BUTTON ", "");
@@ -455,8 +473,9 @@ public class ControlElement {
                     }
                 }
 
-                if (iconId > 0) {
-                    drawIcon(canvas, cx, cy, boundingBox.width(), boundingBox.height(), iconId, true);
+                byte effectiveIconId = getEffectiveIconId();
+                if (effectiveIconId > 0) {
+                    drawIcon(canvas, cx, cy, boundingBox.width(), boundingBox.height(), effectiveIconId, true);
                 }
                 else {
                     String text = getDisplayText();
