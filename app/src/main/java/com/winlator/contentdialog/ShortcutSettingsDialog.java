@@ -17,7 +17,9 @@ import com.winlator.container.GraphicsDrivers;
 import com.winlator.container.Shortcut;
 import com.winlator.core.AppUtils;
 import com.winlator.container.DXWrapperPicker;
+import com.winlator.core.DefaultVersion;
 import com.winlator.core.EnvVars;
+import com.winlator.core.GeneralComponents;
 import com.winlator.container.GraphicsDriverPicker;
 import com.winlator.core.StringUtils;
 import com.winlator.inputcontrols.ControlsProfile;
@@ -81,6 +83,13 @@ public class ShortcutSettingsDialog extends ContentDialog {
         final CheckBox cbForceFullscreen = findViewById(R.id.CBForceFullscreen);
         cbForceFullscreen.setChecked(shortcut.getExtra("forceFullscreen", "0").equals("1"));
 
+        final CheckBox cbToggleFullscreen = findViewById(R.id.CBToggleFullscreen);
+        cbToggleFullscreen.setChecked(shortcut.getExtra("toggleFullscreen", "0").equals("1"));
+
+        final Spinner sBox64Version = findViewById(R.id.SBox64Version);
+        String box64Version = shortcut.getExtra("box64Version", shortcut.container.getBox64Version());
+        GeneralComponents.initViews(GeneralComponents.Type.BOX64, findViewById(R.id.Box64Toolbox), sBox64Version, box64Version, DefaultVersion.BOX64);
+
         final Spinner sBox64Preset = findViewById(R.id.SBox64Preset);
         Box64PresetManager.loadSpinner(sBox64Preset, shortcut.getExtra("box64Preset", shortcut.container.getBox64Preset()));
 
@@ -137,12 +146,16 @@ public class ShortcutSettingsDialog extends ContentDialog {
                 shortcut.putExtra("audioDriver", !audioDriver.equals(shortcut.container.getAudioDriver())? audioDriver : null);
                 shortcut.putExtra("audioDriverConfig", !audioDriverConfig.equals(shortcut.container.getAudioDriverConfig()) ? audioDriverConfig : null);
                 shortcut.putExtra("forceFullscreen", cbForceFullscreen.isChecked() ? "1" : null);
+                shortcut.putExtra("toggleFullscreen", cbToggleFullscreen.isChecked() ? "1" : null);
 
                 String wincomponents = ContainerDetailFragment.getWinComponents(getContentView());
                 shortcut.putExtra("wincomponents", !wincomponents.equals(shortcut.container.getWinComponents()) ? wincomponents : null);
 
                 String envVars = envVarsView.getEnvVars();
                 shortcut.putExtra("envVars", !envVars.isEmpty() ? envVars : null);
+
+                String box64VersionSelected = StringUtils.parseIdentifier(sBox64Version.getSelectedItem());
+                shortcut.putExtra("box64Version", !box64VersionSelected.equals(shortcut.container.getBox64Version()) ? box64VersionSelected : null);
 
                 String box64Preset = Box64PresetManager.getSpinnerSelectedId(sBox64Preset);
                 shortcut.putExtra("box64Preset", !box64Preset.equals(shortcut.container.getBox64Preset()) ? box64Preset : null);

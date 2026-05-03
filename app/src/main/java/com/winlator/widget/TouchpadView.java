@@ -28,6 +28,11 @@ public class TouchpadView extends FrameLayout {
     private boolean pointerButtonRightEnabled = true;
     private boolean moveCursorToTouchpoint = false;
     private boolean swapMouseButtons = false;
+    private boolean twoFingersDrag = true;
+    private boolean twoFingersRightClick = true;
+    private boolean longPressRightClick = true;
+    private boolean pinchZoomEnabled = false;
+    private boolean shortDragEnabled = false;
     private Runnable fourFingersTapCallback;
 
     public TouchpadView(Context context, XServer xServer, boolean capturePointerOnExternalMouse) {
@@ -63,6 +68,11 @@ public class TouchpadView extends FrameLayout {
             v1.setMoveCursorToTouchpoint(moveCursorToTouchpoint);
             v1.setSwapMouseButtons(swapMouseButtons);
             v1.setFourFingersTapCallback(fourFingersTapCallback);
+            v1.setTwoFingersDrag(twoFingersDrag);
+            v1.setTwoFingersRightClick(twoFingersRightClick);
+            v1.setLongPressRightClick(longPressRightClick);
+            v1.setPinchZoomEnabled(pinchZoomEnabled);
+            v1.setShortDragEnabled(shortDragEnabled);
             v1.setEnabled(isEnabled());
         } else if (impl instanceof TouchpadViewV2) {
             TouchpadViewV2 v2 = (TouchpadViewV2) impl;
@@ -72,6 +82,11 @@ public class TouchpadView extends FrameLayout {
             v2.setMoveCursorToTouchpoint(moveCursorToTouchpoint);
             v2.setSwapMouseButtons(swapMouseButtons);
             v2.setFourFingersTapCallback(fourFingersTapCallback);
+            v2.setTwoFingersDrag(twoFingersDrag);
+            v2.setTwoFingersRightClick(twoFingersRightClick);
+            v2.setLongPressRightClick(longPressRightClick);
+            v2.setPinchZoomEnabled(pinchZoomEnabled);
+            v2.setShortDragEnabled(shortDragEnabled);
             v2.setEnabled(isEnabled());
         } else if (impl instanceof TouchpadViewV3) {
             TouchpadViewV3 v3 = (TouchpadViewV3) impl;
@@ -81,6 +96,11 @@ public class TouchpadView extends FrameLayout {
             v3.setMoveCursorToTouchpoint(moveCursorToTouchpoint);
             v3.setSwapMouseButtons(swapMouseButtons);
             v3.setFourFingersTapCallback(fourFingersTapCallback);
+            v3.setTwoFingersDrag(twoFingersDrag);
+            v3.setTwoFingersRightClick(twoFingersRightClick);
+            v3.setLongPressRightClick(longPressRightClick);
+            v3.setPinchZoomEnabled(pinchZoomEnabled);
+            v3.setShortDragEnabled(shortDragEnabled);
             v3.setEnabled(isEnabled());
         }
     }
@@ -170,6 +190,81 @@ public class TouchpadView extends FrameLayout {
             ((TouchpadViewV2) impl).setMoveCursorToTouchpoint(moveCursorToTouchpoint);
         } else if (impl instanceof TouchpadViewV3) {
             ((TouchpadViewV3) impl).setMoveCursorToTouchpoint(moveCursorToTouchpoint);
+        }
+    }
+
+    public boolean isTwoFingersDrag() {
+        return twoFingersDrag;
+    }
+
+    public void setTwoFingersDrag(boolean twoFingersDrag) {
+        this.twoFingersDrag = twoFingersDrag;
+        if (impl instanceof TouchpadViewV1) {
+            ((TouchpadViewV1) impl).setTwoFingersDrag(twoFingersDrag);
+        } else if (impl instanceof TouchpadViewV2) {
+            ((TouchpadViewV2) impl).setTwoFingersDrag(twoFingersDrag);
+        } else if (impl instanceof TouchpadViewV3) {
+            ((TouchpadViewV3) impl).setTwoFingersDrag(twoFingersDrag);
+        }
+    }
+
+    public boolean isTwoFingersRightClick() {
+        return twoFingersRightClick;
+    }
+
+    public void setTwoFingersRightClick(boolean twoFingersRightClick) {
+        this.twoFingersRightClick = twoFingersRightClick;
+        if (impl instanceof TouchpadViewV1) {
+            ((TouchpadViewV1) impl).setTwoFingersRightClick(twoFingersRightClick);
+        } else if (impl instanceof TouchpadViewV2) {
+            ((TouchpadViewV2) impl).setTwoFingersRightClick(twoFingersRightClick);
+        } else if (impl instanceof TouchpadViewV3) {
+            ((TouchpadViewV3) impl).setTwoFingersRightClick(twoFingersRightClick);
+        }
+    }
+
+    public boolean isLongPressRightClick() {
+        return longPressRightClick;
+    }
+
+    public void setLongPressRightClick(boolean longPressRightClick) {
+        this.longPressRightClick = longPressRightClick;
+        if (impl instanceof TouchpadViewV1) {
+            ((TouchpadViewV1) impl).setLongPressRightClick(longPressRightClick);
+        } else if (impl instanceof TouchpadViewV2) {
+            ((TouchpadViewV2) impl).setLongPressRightClick(longPressRightClick);
+        } else if (impl instanceof TouchpadViewV3) {
+            ((TouchpadViewV3) impl).setLongPressRightClick(longPressRightClick);
+        }
+    }
+
+    public boolean isPinchZoomEnabled() {
+        return pinchZoomEnabled;
+    }
+
+    public void setPinchZoomEnabled(boolean pinchZoomEnabled) {
+        this.pinchZoomEnabled = pinchZoomEnabled;
+        if (impl instanceof TouchpadViewV1) {
+            ((TouchpadViewV1) impl).setPinchZoomEnabled(pinchZoomEnabled);
+        } else if (impl instanceof TouchpadViewV2) {
+            ((TouchpadViewV2) impl).setPinchZoomEnabled(pinchZoomEnabled);
+        } else if (impl instanceof TouchpadViewV3) {
+            ((TouchpadViewV3) impl).setPinchZoomEnabled(pinchZoomEnabled);
+        }
+    }
+
+    public boolean isShortDragEnabled() {
+        return shortDragEnabled;
+    }
+
+    public void setShortDragEnabled(boolean shortDragEnabled) {
+        this.shortDragEnabled = shortDragEnabled;
+        if (impl instanceof TouchpadViewV1) {
+            ((TouchpadViewV1) impl).setShortDragEnabled(shortDragEnabled);
+        } else if (impl instanceof TouchpadViewV2) {
+            ((TouchpadViewV2) impl).setShortDragEnabled(shortDragEnabled);
+        } else if (impl instanceof TouchpadViewV3) {
+            ((TouchpadViewV3) impl).setShortDragEnabled(shortDragEnabled);
         }
     }
 

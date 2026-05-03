@@ -159,6 +159,7 @@
     <string name="press_any_button_on_your_controller">Press any button on your controller</string>
     <string name="bindings">Bindings</string>
     <string name="show_touchscreen_controls">Show Touchscreen Controls</string>
+    <string name="haptic_feedback">Haptic Feedback</string>
     <string name="dxwrapper" translatable="false">DX Wrapper</string>
     <string name="mouse_warp_override" translatable="false">Mouse Warp Override</string>
     <string name="direct3d" translatable="false">Direct3D</string>
@@ -306,6 +307,8 @@
     <string name="removing_files">Removing Files...</string>
     <string name="disable_mouse_input">Disable Mouse Input</string>
     <string name="move_cursor_to_touchpoint">Move Cursor to Touchpoint</string>
+    <string name="pinch_zoom">Pinch Zoom</string>
+
     <string name="sync_every_frame">Sync every frame</string>
     <string name="dpi_font_size">DPI (Font Size)</string>
     <string name="preferred_input_api">Preferred Input API</string>
@@ -424,4 +427,10 @@
     <string name="unable_to_restore_container">Unable to restore container</string>
     <string name="invalid_restore_file">Please select a .whp file</string>
     <string name="touchpad_mode">Touchpad Mode</string>
+    <string name="touchpad_settings">Touchpad Settings</string>
+    <string name="two_fingers_drag">Two-fingers Drag</string>
+    <string name="two_fingers_right_click">Two-fingers Right Click</string>
+    <string name="long_press_right_click">Long Press Right Click</string>
+    <string name="pinch_zoom_enabled">Pinch Zoom</string>
+    <string name="short_drag_enabled">Short Drag</string>
 </resources>

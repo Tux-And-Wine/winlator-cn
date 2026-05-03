@@ -154,6 +154,7 @@
     <string name="press_any_button_on_your_controller">按下控制器上的任何按钮</string>
     <string name="bindings">Bindings</string>
     <string name="show_touchscreen_controls">显示触摸屏控件</string>
+    <string name="haptic_feedback">振动反馈</string>
     <string name="dxwrapper" translatable="false">图形加速(请点击❓查看说明)</string>
     <string name="mouse_warp_override" translatable="false">游标覆盖偏移(影响鼠标移动)</string>
     <string name="direct3d" translatable="false">D3D运行库(direct3d)</string>
@@ -301,6 +302,8 @@
     <string name="removing_files">正在删除文件.</string>
     <string name="disable_mouse_input">禁用鼠标输入</string>
     <string name="move_cursor_to_touchpoint">鼠标跟手</string>
+    <string name="pinch_zoom">双指缩放</string>
+
     <string name="sync_every_frame">同步每一帧</string>
     <string name="dpi_font_size">DPI (字体大小)</string>
     <string name="preferred_input_api">选择手柄接口</string>
@@ -423,4 +426,10 @@
     <string name="touch_move_mouse_button">&#x89E6;&#x6478;&#x79FB;&#x52A8;&#x65F6;&#x6309;&#x4E0B;&#x9F20;&#x6807;&#x952E;</string>
     <string name="x_coordinate_center_offset">X&#x5750;&#x6807;&#x4E2D;&#x5FC3;&#x70B9;&#x5FAE;&#x8C03;</string>
     <string name="y_coordinate_center_offset">Y&#x5750;&#x6807;&#x4E2D;&#x5FC3;&#x70B9;&#x5FAE;&#x8C03;</string>
+    <string name="touchpad_settings">触控板设置</string>
+    <string name="two_fingers_drag">双指拖动</string>
+    <string name="two_fingers_right_click">双指右键点击</string>
+    <string name="long_press_right_click">长按右键点击</string>
+    <string name="pinch_zoom_enabled">双指缩放</string>
+    <string name="short_drag_enabled">短时拖动</string>
 </resources>

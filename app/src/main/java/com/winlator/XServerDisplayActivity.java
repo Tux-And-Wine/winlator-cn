@@ -571,7 +571,7 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
             if (!envVars.has("WINEESYNC")) envVars.put("WINEESYNC", "1");
 
             guestProgramLauncherComponent.setBox64Preset(shortcut != null ? shortcut.getExtra("box64Preset", container.getBox64Preset()) : container.getBox64Preset());
-            guestProgramLauncherComponent.setBox64Version(container.getBox64Version());
+            guestProgramLauncherComponent.setBox64Version(shortcut != null ? shortcut.getExtra("box64Version", container.getBox64Version()) : container.getBox64Version());
         }
 
         environment = new XEnvironment(this, rootFS);
@@ -640,6 +640,7 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
         renderer.setCursorColor(preferences.getInt("cursor_color", 0xffffff));
         renderer.setCursorScale(preferences.getFloat("cursor_scale", 1.0f));
         renderer.setForceWindowsFullscreen(shortcut != null && shortcut.getExtra("forceFullscreen", "0").equals("1"));
+        final boolean startFullscreen = shortcut != null && shortcut.getExtra("toggleFullscreen", "0").equals("1");
 
         xServer.setRenderer(renderer);
         rootView.addView(xServerView);
@@ -653,8 +654,14 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
         });
         rootView.addView(touchpadView);
 
+        if (startFullscreen) {
+            renderer.toggleFullscreen();
+            touchpadView.toggleFullscreen();
+        }
+
         inputControlsView = new InputControlsView(this);
         inputControlsView.setOverlayOpacity(preferences.getFloat("overlay_opacity", InputControlsView.DEFAULT_OVERLAY_OPACITY));
+        inputControlsView.setTouchHapticFeedbackEnabled(preferences.getBoolean("haptic_feedback", false));
         inputControlsView.setTouchpadView(touchpadView);
         inputControlsView.setXServer(xServer);
         inputControlsView.setVisibility(View.GONE);
@@ -715,6 +722,9 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
         final CheckBox cbShowTouchscreenControls = dialog.findViewById(R.id.CBShowTouchscreenControls);
         cbShowTouchscreenControls.setChecked(inputControlsView.isShowTouchscreenControls());
 
+        final CheckBox cbHapticFeedback = dialog.findViewById(R.id.CBHapticFeedback);
+        cbHapticFeedback.setChecked(inputControlsView.isTouchHapticFeedbackEnabled());
+
         dialog.findViewById(R.id.BTSettings).setOnClickListener((v) -> {
             int position = sProfile.getSelectedItemPosition();
             int currentProfileId = position > 0 ? inputControlsManager.getProfiles().get(position - 1).id : 0;
@@ -742,6 +752,8 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
         dialog.setOnConfirmCallback(() -> {
             xServer.setRelativeMouseMovement(cbRelativeMouseMovement.isChecked());
             inputControlsView.setShowTouchscreenControls(cbShowTouchscreenControls.isChecked());
+            inputControlsView.setTouchHapticFeedbackEnabled(cbHapticFeedback.isChecked());
+            preferences.edit().putBoolean("haptic_feedback", cbHapticFeedback.isChecked()).apply();
             int position = sProfile.getSelectedItemPosition();
             if (position > 0) {
                 showInputControls(inputControlsManager.getProfiles().get(position - 1));
@@ -760,6 +772,11 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
         touchpadView.setSensitivity(profile.getCursorSpeed() * globalCursorSpeed);
         touchpadView.setTouchpadMode(profile.getTouchpadMode());
         touchpadView.setMoveCursorToTouchpoint(profile.isMoveCursorToTouchpoint());
+        touchpadView.setTwoFingersDrag(profile.isTwoFingersDrag());
+        touchpadView.setTwoFingersRightClick(profile.isTwoFingersRightClick());
+        touchpadView.setLongPressRightClick(profile.isLongPressRightClick());
+        touchpadView.setPinchZoomEnabled(profile.isPinchZoomEnabled());
+        touchpadView.setShortDragEnabled(profile.isShortDragEnabled());
         //可能为了防误触吧，影响以后触摸模式扩展
         //touchpadView.setPointerButtonRightEnabled(false);
 

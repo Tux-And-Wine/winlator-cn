@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.os.BatteryManager;
 import android.os.Build;
@@ -13,9 +14,11 @@ import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.winlator.R;
@@ -25,6 +28,7 @@ import com.winlator.core.BatteryUtils;
 import com.winlator.core.CPUStatus;
 import com.winlator.core.ProcessHelper;
 import com.winlator.core.StringUtils;
+import com.winlator.core.AppUtils;
 import com.winlator.core.UnitUtils;
 import com.winlator.widget.CPUListView;
 import com.winlator.xserver.Window;
@@ -90,6 +94,23 @@ public class TaskManagerDialog extends ContentDialog implements OnGetProcessInfo
         setCancelable(false);
         setTitle(R.string.task_manager);
         setIcon(R.drawable.icon_task_manager);
+
+        LinearLayout llRoot = findViewById(R.id.LLRoot);
+        LinearLayout llProcessContainer = findViewById(R.id.LLProcessContainer);
+        ScrollView svPanelList = findViewById(R.id.SVPanelList);
+        FrameLayout frameLayout = findViewById(R.id.FrameLayout);
+        int orientation = activity.getResources().getConfiguration().orientation;
+        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            llRoot.setOrientation(LinearLayout.HORIZONTAL);
+            LinearLayout.LayoutParams processParams = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1f);
+            llProcessContainer.setLayoutParams(processParams);
+            LinearLayout.LayoutParams panelParams = new LinearLayout.LayoutParams((int)UnitUtils.dpToPx(145), ViewGroup.LayoutParams.WRAP_CONTENT);
+            panelParams.setMargins((int)UnitUtils.dpToPx(8), 0, 0, 0);
+            svPanelList.setLayoutParams(panelParams);
+            frameLayout.getLayoutParams().width = (int)UnitUtils.dpToPx(583);
+        } else {
+            frameLayout.getLayoutParams().width = AppUtils.getPreferredDialogWidth(activity);
+        }
 
         Button cancelButton = findViewById(R.id.BTCancel);
         cancelButton.setText(R.string.new_task);

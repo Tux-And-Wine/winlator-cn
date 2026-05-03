@@ -70,12 +70,26 @@
             android:layout_height="wrap_content"
             android:text="@string/touchpad_mode"/>
 
-        <Spinner
-            style="@style/ComboBox"
-            android:id="@+id/STouchpadMode"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:entries="@array/touchpad_mode_entries" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <Spinner
+                style="@style/ComboBox"
+                android:id="@+id/STouchpadMode"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:entries="@array/touchpad_mode_entries" />
+
+            <ImageButton
+                style="@style/ListMenuButton"
+                android:id="@+id/BTTouchpadSettings"
+                android:layout_marginRight="0dp"
+                android:src="@drawable/icon_settings" />
+        </LinearLayout>
 
         <CheckBox
             android:id="@+id/CBMoveCursorToTouchpoint"
