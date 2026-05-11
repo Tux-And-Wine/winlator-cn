@@ -271,7 +271,8 @@ static inline void convertTexImageFormat(uint32_t target, int* internalformat, u
             *format = GL_RGB;
             break;
         case GL_RGB:
-            if (*type == GL_UNSIGNED_SHORT_5_6_5) *internalformat = GL_RGB565;
+            if (*type == GL_UNSIGNED_SHORT_5_6_5 || *internalformat == GL_RGB5) *internalformat = GL_RGB565;
+            if (*internalformat == GL_RGB) *internalformat = GL_RGB8;
             break;
         case GL_BGRA:
             if (*type == GL_UNSIGNED_SHORT_1_5_5_5_REV) {
