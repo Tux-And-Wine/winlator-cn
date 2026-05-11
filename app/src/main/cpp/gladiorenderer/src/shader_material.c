@@ -269,7 +269,7 @@ static const char* getFragmentShaderHead() {
         "}\n"
 
         "vec4 applyTexEnv(sampler2D sampler, vec4 texCoord, gd_TexEnvParameters texEnv, vec4 fragColor) {\n"
-            "vec4 textureColor = texture(sampler, texCoord.xy);\n"
+            "vec4 textureColor = texture(sampler, texCoord.xy / texCoord.w);\n"
             "int modeRGB = texEnv.mode;\n"
             "int modeAlpha = " TEXENV_MODE_MODULATE ";\n"
             "vec4 operand0 = textureColor;\n"
