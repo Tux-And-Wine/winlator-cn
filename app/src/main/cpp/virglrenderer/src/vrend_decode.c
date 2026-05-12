@@ -1221,14 +1221,15 @@ static int vrend_decode_launch_grid(struct vrend_decode_ctx *ctx, uint16_t lengt
 static int vrend_decode_set_streamout_targets(struct vrend_decode_ctx *ctx,
                                               uint16_t length)
 {
-   uint32_t handles[16];
-   uint32_t num_handles = length - 1;
+   uint32_t handles[PIPE_MAX_SO_BUFFERS];
+   uint32_t num_handles;
    uint32_t append_bitmask;
    uint i;
 
    if (length < 1)
       return EINVAL;
-   if (num_handles > ARRAY_SIZE(handles))
+   num_handles = length - 1;
+   if (num_handles > PIPE_MAX_SO_BUFFERS)
       return EINVAL;
 
    append_bitmask = get_buf_entry(ctx, VIRGL_SET_STREAMOUT_TARGETS_APPEND_BITMASK);
