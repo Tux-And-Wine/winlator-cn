@@ -83,6 +83,8 @@ public class ControlElement {
     private float opacity = 1.0f;
     private short x;
     private short y;
+    private float percentX;
+    private float percentY;
     private int currentPointerId = -1;
     private final Rect boundingBox = new Rect();
     private boolean[] states = new boolean[4];
@@ -263,6 +265,22 @@ public class ControlElement {
     public void setY(int y) {
         this.y = (short)y;
         propertyFlags.set(FLAG_BOUNDING_BOX_NEEDS_UPDATE);
+    }
+
+    public float getPercentX() {
+        return percentX;
+    }
+
+    public void setPercentX(float percentX) {
+        this.percentX = percentX;
+    }
+
+    public float getPercentY() {
+        return percentY;
+    }
+
+    public void setPercentY(float percentY) {
+        this.percentY = percentY;
     }
 
     public boolean isSelected() {
@@ -793,8 +811,12 @@ public class ControlElement {
             elementJSONObject.put("bindings", bindingsJSONArray);
             elementJSONObject.put("scale", Float.valueOf(scale));
             if (opacity < 1.0f) elementJSONObject.put("opacity", Float.valueOf(opacity));
-            elementJSONObject.put("x", (float)x / inputControlsView.getMaxWidth());
-            elementJSONObject.put("y", (float)y / inputControlsView.getMaxHeight());
+            float px = (float)x / inputControlsView.getMaxWidth();
+            float py = (float)y / inputControlsView.getMaxHeight();
+            percentX = px;
+            percentY = py;
+            elementJSONObject.put("x", px);
+            elementJSONObject.put("y", py);
             elementJSONObject.put("toggleSwitch", propertyFlags.isSet(FLAG_TOGGLE_SWITCH));
             elementJSONObject.put("text", text);
             elementJSONObject.put("iconId", iconId);

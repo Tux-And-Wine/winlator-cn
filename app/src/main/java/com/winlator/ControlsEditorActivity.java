@@ -1,6 +1,7 @@
 package com.winlator;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.BitmapFactory;
 import android.graphics.PointF;
 import android.os.Bundle;
@@ -92,6 +93,41 @@ public class ControlsEditorActivity extends AppCompatActivity implements View.On
             }
             return true;
         });
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        updateToolboxLayout();
+        recalculateElementCoordinates();
+    }
+
+    private void updateToolboxLayout() {
+        LinearLayout toolboxLayout = (LinearLayout)toolbox;
+        int orientation = getResources().getConfiguration().orientation;
+
+        if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+            toolboxLayout.setOrientation(LinearLayout.VERTICAL);
+            toolboxLayout.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT));
+            toolboxLayout.setGravity(android.view.Gravity.CENTER_HORIZONTAL);
+        } else {
+            toolboxLayout.setOrientation(LinearLayout.HORIZONTAL);
+            toolboxLayout.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT));
+            toolboxLayout.setGravity(android.view.Gravity.CENTER_VERTICAL);
+        }
+    }
+
+    private void recalculateElementCoordinates() {
+        if (profile == null || !profile.isElementsLoaded()) return;
+        int maxWidth = inputControlsView.getMaxWidth();
+        int maxHeight = inputControlsView.getMaxHeight();
+        if (maxWidth == 0 || maxHeight == 0) return;
+
+        for (ControlElement element : profile.getElements()) {
+            element.setX((int)(element.getPercentX() * maxWidth));
+            element.setY((int)(element.getPercentY() * maxHeight));
+        }
+        inputControlsView.invalidate();
     }
 
     @Override

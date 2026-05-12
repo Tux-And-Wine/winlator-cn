@@ -44,7 +44,7 @@
                 android:layout_height="wrap_content" />
         </LinearLayout>
 
-        <View style="@style/VerticalLine" />
+        <View android:id="@+id/VSeparator" style="@style/VerticalLine" />
 
         <ImageButton
             android:id="@+id/BTAddElement"
