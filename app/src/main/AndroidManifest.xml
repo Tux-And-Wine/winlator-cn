@@ -45,7 +45,8 @@
         <activity android:name="com.winlator.ControlsEditorActivity"
             android:exported="false"
             android:theme="@style/AppThemeFullscreenDark"
-            android:screenOrientation="sensorLandscape" />
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|density|navigation"
+            android:screenOrientation="userLandscape" />
 
         <activity android:name="com.winlator.ExternalControllerBindingsActivity"
             android:theme="@style/AppThemeDark"

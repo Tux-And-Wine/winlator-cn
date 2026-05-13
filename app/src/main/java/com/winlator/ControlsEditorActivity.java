@@ -1,6 +1,8 @@
 package com.winlator;
 
 import android.content.Context;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.graphics.BitmapFactory;
 import android.graphics.PointF;
 import android.os.Bundle;
@@ -45,6 +47,7 @@ public class ControlsEditorActivity extends AppCompatActivity implements View.On
     private InputControlsView inputControlsView;
     private ControlsProfile profile;
     private View toolbox;
+    private boolean isPortraitMode = false;
 
     @Override
     public void onCreate(Bundle bundle) {
@@ -67,6 +70,7 @@ public class ControlsEditorActivity extends AppCompatActivity implements View.On
         container.findViewById(R.id.BTAddElement).setOnClickListener(this);
         container.findViewById(R.id.BTRemoveElement).setOnClickListener(this);
         container.findViewById(R.id.BTElementSettings).setOnClickListener(this);
+        container.findViewById(R.id.BTRotateScreen).setOnClickListener(this);
 
         toolbox = container.findViewById(R.id.Toolbox);
 
@@ -92,6 +96,72 @@ public class ControlsEditorActivity extends AppCompatActivity implements View.On
             }
             return true;
         });
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        updateToolboxLayout();
+        inputControlsView.post(() -> recalculateElementCoordinates());
+    }
+
+    private void updateToolboxLayout() {
+        LinearLayout toolboxLayout = (LinearLayout)toolbox;
+        int orientation = getResources().getConfiguration().orientation;
+        float density = getResources().getDisplayMetrics().density;
+
+        if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+            toolboxLayout.setOrientation(LinearLayout.VERTICAL);
+            FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT);
+            params.gravity = android.view.Gravity.CENTER_HORIZONTAL | android.view.Gravity.TOP;
+            toolboxLayout.setLayoutParams(params);
+            toolboxLayout.setGravity(android.view.Gravity.CENTER_HORIZONTAL);
+
+            View separator = toolboxLayout.findViewById(R.id.VSeparator);
+            if (separator != null) {
+                LinearLayout.LayoutParams sepParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, (int)(2 * density));
+                sepParams.setMargins((int)(8 * density), (int)(4 * density), (int)(8 * density), (int)(4 * density));
+                separator.setLayoutParams(sepParams);
+            }
+
+            LinearLayout profileInfo = (LinearLayout)toolboxLayout.getChildAt(1);
+            if (profileInfo != null) {
+                profileInfo.setOrientation(LinearLayout.HORIZONTAL);
+                profileInfo.setPadding((int)(4 * density), 0, (int)(4 * density), 0);
+            }
+        } else {
+            toolboxLayout.setOrientation(LinearLayout.HORIZONTAL);
+            FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT);
+            params.gravity = android.view.Gravity.CENTER_HORIZONTAL | android.view.Gravity.TOP;
+            toolboxLayout.setLayoutParams(params);
+            toolboxLayout.setGravity(android.view.Gravity.CENTER_VERTICAL);
+
+            View separator = toolboxLayout.findViewById(R.id.VSeparator);
+            if (separator != null) {
+                LinearLayout.LayoutParams sepParams = new LinearLayout.LayoutParams((int)(2 * density), LinearLayout.LayoutParams.MATCH_PARENT);
+                sepParams.setMargins((int)(8 * density), (int)(2 * density), (int)(8 * density), (int)(2 * density));
+                separator.setLayoutParams(sepParams);
+            }
+
+            LinearLayout profileInfo = (LinearLayout)toolboxLayout.getChildAt(1);
+            if (profileInfo != null) {
+                profileInfo.setOrientation(LinearLayout.VERTICAL);
+                profileInfo.setPadding((int)(8 * density), 0, (int)(8 * density), 0);
+            }
+        }
+    }
+
+    private void recalculateElementCoordinates() {
+        if (profile == null || !profile.isElementsLoaded()) return;
+        int maxWidth = inputControlsView.getMaxWidth();
+        int maxHeight = inputControlsView.getMaxHeight();
+        if (maxWidth == 0 || maxHeight == 0) return;
+
+        for (ControlElement element : profile.getElements()) {
+            element.setX((int)(element.getPercentX() * maxWidth));
+            element.setY((int)(element.getPercentY() * maxHeight));
+        }
+        inputControlsView.invalidate();
     }
 
     @Override
@@ -131,6 +201,10 @@ public class ControlsEditorActivity extends AppCompatActivity implements View.On
                     showControlElementSettings(v);
                 }
                 else AppUtils.showToast(this, R.string.no_control_element_selected);
+                break;
+            case R.id.BTRotateScreen:
+                isPortraitMode = !isPortraitMode;
+                setRequestedOrientation(isPortraitMode ? ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT : ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE);
                 break;
         }
     }

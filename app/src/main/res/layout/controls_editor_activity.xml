@@ -44,7 +44,7 @@
                 android:layout_height="wrap_content" />
         </LinearLayout>
 
-        <View style="@style/VerticalLine" />
+        <View android:id="@+id/VSeparator" style="@style/VerticalLine" />
 
         <ImageButton
             android:id="@+id/BTAddElement"
@@ -60,5 +60,10 @@
             android:id="@+id/BTElementSettings"
             style="@style/ToolButton"
             android:src="@drawable/icon_settings"  />
+
+        <ImageButton
+            android:id="@+id/BTRotateScreen"
+            style="@style/ToolButton"
+            android:src="@drawable/icon_fullscreen"  />
     </LinearLayout>
 </FrameLayout>
