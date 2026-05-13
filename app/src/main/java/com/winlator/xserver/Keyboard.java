@@ -101,7 +101,7 @@ public class Keyboard {
         int action = event.getAction();
         if (action == KeyEvent.ACTION_DOWN || action == KeyEvent.ACTION_UP) {
             int keyCode = event.getKeyCode();
-            XKeycode xKeycode = keycodeMap[keyCode];
+            XKeycode xKeycode = keyCode < keycodeMap.length ? keycodeMap[keyCode] : null;
             if (xKeycode == null) return false;
 
             if (action == KeyEvent.ACTION_DOWN) {
@@ -136,7 +136,7 @@ public class Keyboard {
     }
 
     private static XKeycode[] createKeycodeMap() {
-        XKeycode[] keycodeMap = new XKeycode[159];
+        XKeycode[] keycodeMap = new XKeycode[300];
         keycodeMap[KeyEvent.KEYCODE_ENTER] = XKeycode.KEY_ENTER;
         keycodeMap[KeyEvent.KEYCODE_ESCAPE] = XKeycode.KEY_ESC;
         keycodeMap[KeyEvent.KEYCODE_DPAD_LEFT] = XKeycode.KEY_LEFT;
@@ -214,6 +214,7 @@ public class Keyboard {
         keycodeMap[KeyEvent.KEYCODE_NUMPAD_SUBTRACT] = XKeycode.KEY_KP_SUBTRACT;
         keycodeMap[KeyEvent.KEYCODE_NUMPAD_ADD] = XKeycode.KEY_KP_ADD;
         keycodeMap[KeyEvent.KEYCODE_NUMPAD_DOT] = XKeycode.KEY_KP_DEL;
+        keycodeMap[KeyEvent.KEYCODE_NUMPAD_ENTER] = XKeycode.KEY_KP_ENTER;
         keycodeMap[KeyEvent.KEYCODE_NUMPAD_0] = XKeycode.KEY_KP_0;
         keycodeMap[KeyEvent.KEYCODE_NUMPAD_1] = XKeycode.KEY_KP_1;
         keycodeMap[KeyEvent.KEYCODE_NUMPAD_2] = XKeycode.KEY_KP_2;
@@ -326,6 +327,7 @@ public class Keyboard {
         keyboard.setKeysyms(XKeycode.KEY_KP_8.id, 65464, 65431);
         keyboard.setKeysyms(XKeycode.KEY_KP_9.id, 65465, 65465);
         keyboard.setKeysyms(XKeycode.KEY_KP_DEL.id, 65439, 0);
+        keyboard.setKeysyms(XKeycode.KEY_KP_ENTER.id, 65421, 0);
         keyboard.setKeysyms(XKeycode.KEY_F1.id, 65470, 0);
         keyboard.setKeysyms(XKeycode.KEY_F2.id, 65471, 0);
         keyboard.setKeysyms(XKeycode.KEY_F3.id, 65472, 0);
