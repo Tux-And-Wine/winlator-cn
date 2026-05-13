@@ -313,6 +313,8 @@ public class ControlsProfile implements Comparable<ControlsProfile>, GamepadSlot
                     element.setToggleSwitch(elementJSONObject.getBoolean("toggleSwitch"));
                     element.setX((int)(elementJSONObject.getDouble("x") * inputControlsView.getMaxWidth()));
                     element.setY((int)(elementJSONObject.getDouble("y") * inputControlsView.getMaxHeight()));
+                    element.setPercentX((float)elementJSONObject.getDouble("x"));
+                    element.setPercentY((float)elementJSONObject.getDouble("y"));
                     element.setScale((float)elementJSONObject.getDouble("scale"));
                     element.setText(elementJSONObject.getString("text"));
                     element.setIconId(elementJSONObject.getInt("iconId"));
