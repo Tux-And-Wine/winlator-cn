@@ -239,6 +239,7 @@ public class Keyboard {
         keycodeMap[KeyEvent.KEYCODE_F12] = XKeycode.KEY_F12;
         keycodeMap[KeyEvent.KEYCODE_NUM_LOCK] = XKeycode.KEY_NUM_LOCK;
         keycodeMap[KeyEvent.KEYCODE_CAPS_LOCK] = XKeycode.KEY_CAPS_LOCK;
+        keycodeMap[KeyEvent.KEYCODE_SCROLL_LOCK] = XKeycode.KEY_SCROLL_LOCK;
         return keycodeMap;
     }
 
@@ -341,6 +342,7 @@ public class Keyboard {
         keyboard.setKeysyms(XKeycode.KEY_F11.id, 65480, 0);
         keyboard.setKeysyms(XKeycode.KEY_F12.id, 65481, 0);
         keyboard.setKeysyms(XKeycode.KEY_PAUSE.id, 65299, 0);
+        keyboard.setKeysyms(XKeycode.KEY_SCROLL_LOCK.id, 65302, 0);
         return keyboard;
     }
 
