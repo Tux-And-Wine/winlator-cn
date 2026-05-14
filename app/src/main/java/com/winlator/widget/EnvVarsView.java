@@ -35,7 +35,7 @@ public class EnvVarsView extends FrameLayout {
         {"ZINK_CONTEXT_THREADED", "CHECKBOX", "0", "1"},
         {"WINEESYNC", "CHECKBOX", "0", "1"},
         {"WINEDLLOVERRIDES", "TEXT"},
-        {"TU_DEBUG", "SELECT_MULTIPLE", "startup", "nir", "nobin", "sysmem", "gmem", "forcebin", "layout", "noubwc", "nomultipos", "nolrz", "nolrzfc", "perf", "perfc", "flushall", "syncdraw", "push_consts_per_stage", "rast_order", "unaligned_store", "log_skip_gmem_ops", "dynamic", "bos", "3d_load", "fdm", "noconform", "rd"},
+        {"TU_DEBUG", "SELECT_MULTIPLE", "startup", "nir", "nofsdt", "nobin", "sysmem", "gmem", "forcebin", "layout", "noubwc", "nomultipos", "nolrz", "nolrzfc", "perf", "perfc", "flushall", "syncdraw", "push_consts_per_stage", "rast_order", "unaligned_store", "log_skip_gmem_ops", "dynamic", "bos", "3d_load", "fdm", "noconform", "rd"},
         {"DXVK_HUD", "SELECT_MULTIPLE", "devinfo", "fps", "frametimes", "submissions", "drawcalls", "pipelines", "descriptors", "memory", "gpuload", "version", "api", "cs", "compiler", "samplers"},
         {"DXVK_LOG_LEVEL", "SELECT", "none", "error", "warn", "info", "debug"},
         {"GST_DEBUG", "SELECT", "0", "1", "2", "3", "4", "5"},
