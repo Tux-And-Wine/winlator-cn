@@ -1,17 +1,26 @@
 package com.winlator;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.PointF;
+import android.graphics.RectF;
+import android.net.Uri;
 import android.os.Bundle;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -25,22 +34,28 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.winlator.core.ImageUtils;
 import com.winlator.core.LocaleHelper;
 import com.winlator.inputcontrols.Binding;
 import com.winlator.inputcontrols.ControlElement;
 import com.winlator.inputcontrols.ControlsProfile;
+import com.winlator.inputcontrols.IconPackManager;
 import com.winlator.inputcontrols.InputControlsManager;
 import com.winlator.math.Mathf;
 import com.winlator.core.AppUtils;
 import com.winlator.core.FileUtils;
 import com.winlator.core.UnitUtils;
+import com.winlator.contentdialog.ContentDialog;
+import com.winlator.widget.ColorPickerView;
 import com.winlator.widget.InputControlsView;
 import com.winlator.widget.NumberPicker;
 import com.winlator.widget.SeekBar;
 import com.winlator.winhandler.MIDIHandler;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class ControlsEditorActivity extends AppCompatActivity implements View.OnClickListener {
@@ -48,6 +63,19 @@ public class ControlsEditorActivity extends AppCompatActivity implements View.On
     private ControlsProfile profile;
     private View toolbox;
     private boolean isPortraitMode = false;
+    private static final int OPEN_CUSTOM_ICON_REQUEST_CODE = 1001;
+    private static final int IMPORT_ICON_PACK_REQUEST_CODE = 1002;
+    private static final int EXPORT_ICON_PACK_REQUEST_CODE = 1003;
+    private static final int CREATE_ICON_PACK_REQUEST_CODE = 1004;
+    private IconPackManager iconPackManager;
+    private PopupWindow elementSettingsPopup;
+    private ControlElement editingElement;
+    private LinearLayout editingIconList;
+    private ImageView editingCustomIconPreview;
+    private byte editingSelectedIconId;
+    private String editingCustomIconData = "";
+    private String pendingExportPackId;
+    private String pendingCreatePackName;
 
     @Override
     public void onCreate(Bundle bundle) {
@@ -60,6 +88,8 @@ public class ControlsEditorActivity extends AppCompatActivity implements View.On
         inputControlsView.setEditMode(true);
         inputControlsView.setOverlayOpacity(0.6f);
 
+        iconPackManager = new IconPackManager(this);
+
         profile = InputControlsManager.loadProfile(this, ControlsProfile.getProfileFile(this, getIntent().getIntExtra("profile_id", 0)));
         ((TextView)findViewById(R.id.TVProfileName)).setText(profile.getName());
         inputControlsView.setProfile(profile);
@@ -70,6 +100,7 @@ public class ControlsEditorActivity extends AppCompatActivity implements View.On
         container.findViewById(R.id.BTAddElement).setOnClickListener(this);
         container.findViewById(R.id.BTRemoveElement).setOnClickListener(this);
         container.findViewById(R.id.BTElementSettings).setOnClickListener(this);
+        container.findViewById(R.id.BTIconPackManager).setOnClickListener(this);
         container.findViewById(R.id.BTRotateScreen).setOnClickListener(this);
 
         toolbox = container.findViewById(R.id.Toolbox);
@@ -103,6 +134,84 @@ public class ControlsEditorActivity extends AppCompatActivity implements View.On
         super.onConfigurationChanged(newConfig);
         updateToolboxLayout();
         inputControlsView.post(() -> recalculateElementCoordinates());
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refreshEditingIconList();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == OPEN_CUSTOM_ICON_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null && data.getData() != null) {
+            if (editingCustomIconPreview == null) return;
+            Bitmap bitmap = ImageUtils.getBitmapFromUri(this, data.getData(), 256);
+            if (bitmap == null) {
+                AppUtils.showToast(this, R.string.unable_to_load_image);
+                return;
+            }
+
+            Bitmap normalizedBitmap = normalizeIconBitmap(bitmap, (int)UnitUtils.dpToPx(64));
+            editingCustomIconData = encodeBitmapToBase64(normalizedBitmap);
+            editingSelectedIconId = 0;
+            clearBuiltinIconSelection();
+            updateCustomIconPreview(normalizedBitmap);
+        }
+        else if (requestCode == IMPORT_ICON_PACK_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null && data.getData() != null) {
+            try {
+                IconPackManager.StoredIconPack pack = iconPackManager.importPack(data.getData());
+                if (pack != null) {
+                    AppUtils.showToast(this, getString(R.string.icon_pack_imported, pack.name));
+                    refreshEditingIconList();
+                }
+                else AppUtils.showToast(this, R.string.unable_to_import_icon_pack);
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+                AppUtils.showToast(this, getString(R.string.unable_to_import_icon_pack_with_reason, getImportErrorMessage(e)));
+            }
+        }
+        else if (requestCode == EXPORT_ICON_PACK_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null && data.getData() != null) {
+            try {
+                IconPackManager.StoredIconPack pack = iconPackManager.getActivePack();
+                if (pack != null && pendingExportPackId != null && pendingExportPackId.equals(pack.id) && iconPackManager.exportPack(pack, data.getData())) {
+                    AppUtils.showToast(this, getString(R.string.icon_pack_exported, pack.name));
+                }
+                else AppUtils.showToast(this, R.string.unable_to_export_icon_pack);
+            }
+            catch (Exception e) {
+                AppUtils.showToast(this, R.string.unable_to_export_icon_pack);
+            }
+            pendingExportPackId = null;
+        }
+        else if (requestCode == CREATE_ICON_PACK_REQUEST_CODE) {
+            try {
+                if (resultCode != Activity.RESULT_OK || data == null) return;
+
+                ArrayList<Uri> selectedUris = getSelectedImageUris(data);
+                ArrayList<IconPackManager.SourceIcon> sourceIcons = loadIconPackSourceIcons(selectedUris);
+                if (sourceIcons.isEmpty()) {
+                    AppUtils.showToast(this, R.string.unable_to_load_image);
+                    return;
+                }
+
+                IconPackManager.StoredIconPack pack = iconPackManager.createPack(pendingCreatePackName, "", sourceIcons);
+                if (pack != null) {
+                    AppUtils.showToast(this, getString(R.string.icon_pack_created, pack.name));
+                    refreshEditingIconList();
+                }
+                else AppUtils.showToast(this, R.string.unable_to_create_icon_pack);
+            }
+            catch (Exception e) {
+                AppUtils.showToast(this, R.string.unable_to_create_icon_pack);
+            }
+            finally {
+                pendingCreatePackName = null;
+            }
+        }
     }
 
     private void updateToolboxLayout() {
@@ -201,6 +310,9 @@ public class ControlsEditorActivity extends AppCompatActivity implements View.On
                     showControlElementSettings(v);
                 }
                 else AppUtils.showToast(this, R.string.no_control_element_selected);
+                break;
+            case R.id.BTIconPackManager:
+                startActivity(new Intent(this, IconPackManagerActivity.class));
                 break;
             case R.id.BTRotateScreen:
                 isPortraitMode = !isPortraitMode;
@@ -307,30 +419,62 @@ public class ControlsEditorActivity extends AppCompatActivity implements View.On
 
         final EditText etCustomText = view.findViewById(R.id.ETCustomText);
         etCustomText.setText(element.getText());
-        final LinearLayout llIconList = view.findViewById(R.id.LLIconList);
-        loadIcons(llIconList, element.getIconId());
+
+        final SeekBar sbIconScale = view.findViewById(R.id.SBIconScale);
+        sbIconScale.setValue(element.getIconScale() * 100);
+        sbIconScale.setOnValueChangeListener((seekBar, value) -> {
+            element.setIconScale(value / 100.0f);
+            profile.save();
+            inputControlsView.invalidate();
+        });
+
+        final SeekBar sbIconOpacity = view.findViewById(R.id.SBIconOpacity);
+        sbIconOpacity.setValue(element.getIconOpacity() * 100);
+        sbIconOpacity.setOnValueChangeListener((seekBar, value) -> {
+            element.setIconOpacity(value / 100.0f);
+            profile.save();
+            inputControlsView.invalidate();
+        });
+
+        final ColorPickerView cpvPressedColor = view.findViewById(R.id.CPVPressedColor);
+        cpvPressedColor.setPalette(0x000000, 0xffffff, 0xd32f2f, 0xff6f00, 0xffea00, 0x2e7d32, 0x00838f, 0x1565c0);
+        cpvPressedColor.setColor(element.getPressedColor());
+
+        editingElement = element;
+        editingIconList = view.findViewById(R.id.LLIconList);
+        editingCustomIconPreview = view.findViewById(R.id.IVCustomIconPreview);
+        editingSelectedIconId = element.hasCustomIcon() ? 0 : element.getIconId();
+        editingCustomIconData = element.hasCustomIcon() ? element.getCustomIconData() : "";
+
+        updateCustomIconPreview(element.hasCustomIcon() ? element.getCustomIcon() : null);
+        view.findViewById(R.id.BTBrowseCustomIcon).setOnClickListener((v) -> {
+            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+            intent.setType("image/*");
+            startActivityForResult(intent, OPEN_CUSTOM_ICON_REQUEST_CODE);
+        });
+        view.findViewById(R.id.BTClearCustomIcon).setOnClickListener((v) -> {
+            editingCustomIconData = "";
+            editingSelectedIconId = 0;
+            clearBuiltinIconSelection();
+            updateCustomIconPreview(null);
+        });
+        loadIcons(editingIconList, editingSelectedIconId, editingCustomIconData);
 
         updateLayout.run();
 
-        PopupWindow popupWindow = AppUtils.showPopupWindow(anchorView, view, 340, 0);
-        popupWindow.setOnDismissListener(() -> {
-            byte iconId = 0;
+        elementSettingsPopup = AppUtils.showPopupWindow(anchorView, view, 340, 0);
+        elementSettingsPopup.setOnDismissListener(() -> {
             if (element.getType() == ControlElement.Type.BUTTON) {
-                for (int i = 0; i < llIconList.getChildCount(); i++) {
-                    View child = llIconList.getChildAt(i);
-                    if (child.isSelected()) {
-                        iconId = (byte)child.getTag();
-                        break;
-                    }
-                }
-
                 String text = etCustomText.getText().toString().trim();
                 element.setText(text);
+                element.setCustomIconData(editingCustomIconData);
+                element.setIconId(editingCustomIconData.isEmpty() ? editingSelectedIconId : 0);
+                element.setPressedColor(cpvPressedColor.getColor());
             }
-
-            element.setIconId(iconId);
             profile.save();
             inputControlsView.invalidate();
+            clearEditingState();
         });
     }
 
@@ -519,7 +663,8 @@ public class ControlsEditorActivity extends AppCompatActivity implements View.On
         });
     }
 
-    private void loadIcons(final LinearLayout parent, byte selectedId) {
+    private void loadIcons(final LinearLayout parent, byte selectedId, String selectedCustomIconData) {
+        parent.removeAllViews();
         byte[] iconIds = new byte[0];
         try {
             String[] filenames = getAssets().list("inputcontrols/icons/");
@@ -544,10 +689,13 @@ public class ControlsEditorActivity extends AppCompatActivity implements View.On
             imageView.setPadding(padding, padding, padding, padding);
             imageView.setBackgroundResource(R.drawable.icon_background);
             imageView.setTag(id);
-            imageView.setSelected(id == selectedId);
+            imageView.setSelected(id == selectedId && selectedCustomIconData.isEmpty());
             imageView.setOnClickListener((v) -> {
                 for (int i = 0; i < parent.getChildCount(); i++) parent.getChildAt(i).setSelected(false);
                 imageView.setSelected(true);
+                editingSelectedIconId = id;
+                editingCustomIconData = "";
+                updateCustomIconPreview(null);
             });
 
             try (InputStream is = getAssets().open("inputcontrols/icons/"+id+".png")) {
@@ -557,5 +705,116 @@ public class ControlsEditorActivity extends AppCompatActivity implements View.On
 
             parent.addView(imageView);
         }
+
+        for (IconPackManager.StoredIconPack activePack : iconPackManager.getActivePacks()) {
+            for (final IconPackManager.PackIcon packIcon : activePack.icons) {
+                final byte[] iconData = packIcon.readBytes();
+                if (iconData == null || iconData.length == 0) continue;
+
+                final String base64IconData = Base64.encodeToString(iconData, Base64.NO_WRAP);
+                ImageView imageView = new ImageView(this);
+                imageView.setLayoutParams(params);
+                imageView.setPadding(padding, padding, padding, padding);
+                imageView.setBackgroundResource(R.drawable.icon_background);
+                imageView.setSelected(base64IconData.equals(selectedCustomIconData));
+                imageView.setOnClickListener((v) -> {
+                    for (int i = 0; i < parent.getChildCount(); i++) parent.getChildAt(i).setSelected(false);
+                    imageView.setSelected(true);
+                    editingSelectedIconId = 0;
+                    editingCustomIconData = base64IconData;
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(iconData, 0, iconData.length);
+                    updateCustomIconPreview(bitmap);
+                });
+                imageView.setImageBitmap(BitmapFactory.decodeByteArray(iconData, 0, iconData.length));
+                parent.addView(imageView);
+            }
+        }
+    }
+
+    private void clearBuiltinIconSelection() {
+        if (editingIconList == null) return;
+        for (int i = 0; i < editingIconList.getChildCount(); i++) {
+            editingIconList.getChildAt(i).setSelected(false);
+        }
+    }
+
+    private void updateCustomIconPreview(Bitmap bitmap) {
+        if (editingCustomIconPreview == null) return;
+
+        if (bitmap != null) {
+            editingCustomIconPreview.setImageBitmap(bitmap);
+            editingCustomIconPreview.setSelected(true);
+        }
+        else {
+            editingCustomIconPreview.setImageResource(R.drawable.icon_image_picker);
+            editingCustomIconPreview.setSelected(false);
+        }
+    }
+
+    private void clearEditingState() {
+        elementSettingsPopup = null;
+        editingElement = null;
+        editingIconList = null;
+        editingCustomIconPreview = null;
+        editingSelectedIconId = 0;
+        editingCustomIconData = "";
+    }
+
+    private void refreshEditingIconList() {
+        if (editingIconList != null) loadIcons(editingIconList, editingSelectedIconId, editingCustomIconData);
+    }
+
+    private static Bitmap normalizeIconBitmap(Bitmap bitmap, int size) {
+        Bitmap normalizedBitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(normalizedBitmap);
+        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
+        float scale = Math.min((float)size / bitmap.getWidth(), (float)size / bitmap.getHeight());
+        float width = bitmap.getWidth() * scale;
+        float height = bitmap.getHeight() * scale;
+        float left = (size - width) * 0.5f;
+        float top = (size - height) * 0.5f;
+        canvas.drawBitmap(bitmap, null, new RectF(left, top, left + width, top + height), paint);
+        return normalizedBitmap;
+    }
+
+    private static byte[] encodeBitmapToBytes(Bitmap bitmap) {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+        return outputStream.toByteArray();
+    }
+
+    private static String encodeBitmapToBase64(Bitmap bitmap) {
+        return Base64.encodeToString(encodeBitmapToBytes(bitmap), Base64.NO_WRAP);
+    }
+
+    private ArrayList<Uri> getSelectedImageUris(Intent data) {
+        ArrayList<Uri> uris = new ArrayList<>();
+        if (data.getClipData() != null) {
+            for (int i = 0; i < data.getClipData().getItemCount(); i++) {
+                Uri uri = data.getClipData().getItemAt(i).getUri();
+                if (uri != null) uris.add(uri);
+            }
+        }
+        else if (data.getData() != null) uris.add(data.getData());
+        return uris;
+    }
+
+    private ArrayList<IconPackManager.SourceIcon> loadIconPackSourceIcons(ArrayList<Uri> uris) {
+        ArrayList<IconPackManager.SourceIcon> iconBytesList = new ArrayList<>();
+        for (Uri uri : uris) {
+            Bitmap bitmap = ImageUtils.getBitmapFromUri(this, uri, 256);
+            if (bitmap == null) continue;
+
+            Bitmap normalizedBitmap = normalizeIconBitmap(bitmap, 256);
+            byte[] bytes = encodeBitmapToBytes(normalizedBitmap);
+            if (bytes.length > 0) iconBytesList.add(new IconPackManager.SourceIcon("", uri.toString(), 0, bytes));
+        }
+        return iconBytesList;
+    }
+
+    private static String getImportErrorMessage(Exception e) {
+        String message = e.getMessage();
+        if (message == null || message.trim().isEmpty()) return e.getClass().getSimpleName();
+        return message;
     }
 }

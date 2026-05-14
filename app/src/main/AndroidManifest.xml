@@ -48,6 +48,16 @@
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|density|navigation"
             android:screenOrientation="userLandscape" />
 
+        <activity android:name="com.winlator.IconPackManagerActivity"
+            android:exported="false"
+            android:theme="@style/AppThemeDark"
+            android:screenOrientation="sensorLandscape" />
+
+        <activity android:name="com.winlator.IconPackDetailsActivity"
+            android:exported="false"
+            android:theme="@style/AppThemeDark"
+            android:screenOrientation="sensorLandscape" />
+
         <activity android:name="com.winlator.ExternalControllerBindingsActivity"
             android:theme="@style/AppThemeDark"
             android:exported="false"
