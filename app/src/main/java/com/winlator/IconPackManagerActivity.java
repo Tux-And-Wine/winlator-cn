@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,6 +26,7 @@ import com.winlator.core.StringUtils;
 import com.winlator.inputcontrols.IconPackManager;
 import com.winlator.inputcontrols.IconPackUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -80,9 +82,11 @@ public class IconPackManagerActivity extends AppCompatActivity {
 
         if (resultCode != Activity.RESULT_OK || data == null) return;
 
-        if (requestCode == IMPORT_ICON_PACK_REQUEST_CODE && data.getData() != null) {
+        if (requestCode == IMPORT_ICON_PACK_REQUEST_CODE) {
+            ArrayList<String> filePaths = data.getStringArrayListExtra(ImageFilePickerActivity.EXTRA_SELECTED_FILES);
+            if (filePaths == null || filePaths.isEmpty()) return;
             try {
-                IconPackManager.StoredIconPack pack = iconPackManager.importPack(data.getData());
+                IconPackManager.StoredIconPack pack = iconPackManager.importPack(new File(filePaths.get(0)));
                 if (pack != null) {
                     AppUtils.showToast(this, getString(R.string.icon_pack_imported, pack.name));
                     refreshPacks();
@@ -94,8 +98,13 @@ public class IconPackManagerActivity extends AppCompatActivity {
             }
         }
         else if (requestCode == CREATE_ICON_PACK_IMAGES_REQUEST_CODE) {
+            ArrayList<String> filePaths = data.getStringArrayListExtra(ImageFilePickerActivity.EXTRA_SELECTED_FILES);
             pendingCreateIcons.clear();
-            pendingCreateIcons.addAll(IconPackUtils.loadSourceIcons(this, IconPackUtils.getSelectedUris(data), ICON_TARGET_SIZE));
+            if (filePaths != null) {
+                ArrayList<Uri> uris = new ArrayList<>();
+                for (String path : filePaths) uris.add(Uri.fromFile(new File(path)));
+                pendingCreateIcons.addAll(IconPackUtils.loadSourceIcons(this, uris, ICON_TARGET_SIZE));
+            }
             updateCreateDialogSelectedState();
         }
     }
@@ -110,9 +119,10 @@ public class IconPackManagerActivity extends AppCompatActivity {
     }
 
     private void openIconPackFile() {
-        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
-        intent.setType("*/*");
+        Intent intent = new Intent(this, ImageFilePickerActivity.class);
+        intent.putExtra(ImageFilePickerActivity.EXTRA_MODE, ImageFilePickerActivity.MODE_FILE);
+        intent.putExtra(ImageFilePickerActivity.EXTRA_ALLOW_MULTIPLE, false);
+        intent.putExtra(ImageFilePickerActivity.EXTRA_FILE_FILTER, "ipk");
         startActivityForResult(intent, IMPORT_ICON_PACK_REQUEST_CODE);
     }
 
@@ -127,10 +137,9 @@ public class IconPackManagerActivity extends AppCompatActivity {
         pendingCreateIcons.clear();
 
         createDialog.findViewById(R.id.BTSelectIcons).setOnClickListener((v) -> {
-            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-            intent.addCategory(Intent.CATEGORY_OPENABLE);
-            intent.setType("image/*");
-            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+            Intent intent = new Intent(this, ImageFilePickerActivity.class);
+            intent.putExtra(ImageFilePickerActivity.EXTRA_MODE, ImageFilePickerActivity.MODE_IMAGE);
+            intent.putExtra(ImageFilePickerActivity.EXTRA_ALLOW_MULTIPLE, true);
             startActivityForResult(intent, CREATE_ICON_PACK_IMAGES_REQUEST_CODE);
         });
 

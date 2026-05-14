@@ -66,6 +66,15 @@
         <item name="android:windowTranslucentStatus">true</item>
         <item name="android:windowTranslucentNavigation">true</item>
     </style>
+    <style name="BottomSheetActivityDark" parent="@style/AppThemeDark">
+        <item name="android:windowAnimationStyle">@style/BottomSheetAnimation</item>
+    </style>
+    <style name="BottomSheetAnimation">
+        <item name="android:activityOpenEnterAnimation">@anim/slide_up</item>
+        <item name="android:activityOpenExitAnimation">@anim/hold</item>
+        <item name="android:activityCloseEnterAnimation">@anim/hold</item>
+        <item name="android:activityCloseExitAnimation">@anim/slide_down</item>
+    </style>
     <style name="ComboBox">
         <item name="android:layout_width">192dp</item>
         <item name="android:layout_height">42dp</item>

@@ -146,9 +146,12 @@ public class ControlsEditorActivity extends AppCompatActivity implements View.On
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == OPEN_CUSTOM_ICON_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null && data.getData() != null) {
+        if (requestCode == OPEN_CUSTOM_ICON_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
             if (editingCustomIconPreview == null) return;
-            Bitmap bitmap = ImageUtils.getBitmapFromUri(this, data.getData(), 256);
+            ArrayList<String> filePaths = data.getStringArrayListExtra(ImageFilePickerActivity.EXTRA_SELECTED_FILES);
+            if (filePaths == null || filePaths.isEmpty()) return;
+
+            Bitmap bitmap = BitmapFactory.decodeFile(filePaths.get(0));
             if (bitmap == null) {
                 AppUtils.showToast(this, R.string.unable_to_load_image);
                 return;
@@ -448,9 +451,9 @@ public class ControlsEditorActivity extends AppCompatActivity implements View.On
 
         updateCustomIconPreview(element.hasCustomIcon() ? element.getCustomIcon() : null);
         view.findViewById(R.id.BTBrowseCustomIcon).setOnClickListener((v) -> {
-            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-            intent.addCategory(Intent.CATEGORY_OPENABLE);
-            intent.setType("image/*");
+            Intent intent = new Intent(this, ImageFilePickerActivity.class);
+            intent.putExtra(ImageFilePickerActivity.EXTRA_MODE, ImageFilePickerActivity.MODE_IMAGE);
+            intent.putExtra(ImageFilePickerActivity.EXTRA_ALLOW_MULTIPLE, false);
             startActivityForResult(intent, OPEN_CUSTOM_ICON_REQUEST_CODE);
         });
         view.findViewById(R.id.BTClearCustomIcon).setOnClickListener((v) -> {

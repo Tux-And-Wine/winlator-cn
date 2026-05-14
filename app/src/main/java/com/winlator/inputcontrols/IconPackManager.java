@@ -195,6 +195,18 @@ public class IconPackManager {
         setActivePackIds(activePackIds);
     }
 
+    public StoredIconPack importPack(File file) throws IOException, ClassNotFoundException, JSONException {
+        byte[] bytes = FileUtils.read(file);
+        if (bytes == null || !isSerializedIpk(bytes)) throw new IOException(describeInvalidHeader(bytes));
+
+        try {
+            return importPack(deserializeIconPack(bytes));
+        }
+        catch (IOException | ClassNotFoundException firstException) {
+            throw firstException;
+        }
+    }
+
     public StoredIconPack importPack(Uri uri) throws IOException, ClassNotFoundException, JSONException {
         byte[] bytes;
         try (InputStream inputStream = context.getContentResolver().openInputStream(uri)) {
@@ -352,6 +364,17 @@ public class IconPackManager {
 
         metadata.put("icons", updatedIconsJSONArray);
         return writeMetadataAndLoadPack(dir, metadata);
+    }
+
+    public boolean exportPack(StoredIconPack pack, File file) throws IOException {
+        if (pack == null) return false;
+
+        IconPack iconPack = toSerializablePack(pack);
+        byte[] bytes = serializeIconPack(iconPack);
+        iconPack.packSize = bytes.length;
+        bytes = serializeIconPack(iconPack);
+
+        return FileUtils.write(file, bytes);
     }
 
     public boolean exportPack(StoredIconPack pack, Uri uri) throws IOException {

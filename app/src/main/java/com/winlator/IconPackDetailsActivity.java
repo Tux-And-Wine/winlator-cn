@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,6 +24,7 @@ import com.winlator.core.LocaleHelper;
 import com.winlator.inputcontrols.IconPackManager;
 import com.winlator.inputcontrols.IconPackUtils;
 
+import java.io.File;
 import java.util.ArrayList;
 
 public class IconPackDetailsActivity extends AppCompatActivity {
@@ -76,8 +78,12 @@ public class IconPackDetailsActivity extends AppCompatActivity {
         if (resultCode != Activity.RESULT_OK || data == null) return;
 
         if ((requestCode == ADD_SINGLE_ICON_REQUEST_CODE || requestCode == ADD_MULTIPLE_ICONS_REQUEST_CODE)) {
+            ArrayList<String> filePaths = data.getStringArrayListExtra(ImageFilePickerActivity.EXTRA_SELECTED_FILES);
+            if (filePaths == null || filePaths.isEmpty()) return;
             try {
-                ArrayList<IconPackManager.SourceIcon> icons = IconPackUtils.loadSourceIcons(this, IconPackUtils.getSelectedUris(data), ICON_TARGET_SIZE);
+                ArrayList<Uri> uris = new ArrayList<>();
+                for (String path : filePaths) uris.add(Uri.fromFile(new File(path)));
+                ArrayList<IconPackManager.SourceIcon> icons = IconPackUtils.loadSourceIcons(this, uris, ICON_TARGET_SIZE);
                 if (icons.isEmpty()) {
                     AppUtils.showToast(this, R.string.unable_to_load_image);
                     return;
@@ -93,10 +99,13 @@ public class IconPackDetailsActivity extends AppCompatActivity {
                 AppUtils.showToast(this, R.string.unable_to_create_icon_pack);
             }
         }
-        else if (requestCode == EXPORT_ICON_PACK_REQUEST_CODE && data.getData() != null) {
+        else if (requestCode == EXPORT_ICON_PACK_REQUEST_CODE) {
+            ArrayList<String> filePaths = data.getStringArrayListExtra(ImageFilePickerActivity.EXTRA_SELECTED_FILES);
+            if (filePaths == null || filePaths.isEmpty()) return;
             try {
                 pack = iconPackManager.getPack(packId);
-                if (pack != null && iconPackManager.exportPack(pack, data.getData())) {
+                File exportFile = new File(filePaths.get(0), FileUtils.getName(pack.name)+".ipk");
+                if (pack != null && iconPackManager.exportPack(pack, exportFile)) {
                     AppUtils.showToast(this, getString(R.string.icon_pack_exported, pack.name));
                 }
                 else AppUtils.showToast(this, R.string.unable_to_export_icon_pack);
@@ -121,20 +130,17 @@ public class IconPackDetailsActivity extends AppCompatActivity {
     }
 
     private void openImagePicker(boolean allowMultiple) {
-        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
-        intent.setType("image/*");
-        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, allowMultiple);
+        Intent intent = new Intent(this, ImageFilePickerActivity.class);
+        intent.putExtra(ImageFilePickerActivity.EXTRA_MODE, ImageFilePickerActivity.MODE_IMAGE);
+        intent.putExtra(ImageFilePickerActivity.EXTRA_ALLOW_MULTIPLE, allowMultiple);
         startActivityForResult(intent, allowMultiple ? ADD_MULTIPLE_ICONS_REQUEST_CODE : ADD_SINGLE_ICON_REQUEST_CODE);
     }
 
     private void exportPack() {
         if (pack == null) return;
 
-        Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
-        intent.setType("*/*");
-        intent.putExtra(Intent.EXTRA_TITLE, FileUtils.getName(pack.name)+".ipk");
+        Intent intent = new Intent(this, ImageFilePickerActivity.class);
+        intent.putExtra(ImageFilePickerActivity.EXTRA_MODE, ImageFilePickerActivity.MODE_SAVE_DIR);
         startActivityForResult(intent, EXPORT_ICON_PACK_REQUEST_CODE);
     }
 
