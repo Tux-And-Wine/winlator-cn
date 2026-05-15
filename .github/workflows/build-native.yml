@@ -56,9 +56,9 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Install NDK
+      - name: Install NDK and CMake
         run: |
-          sdkmanager --install "ndk;${{ env.NDK_VERSION }}"
+          sdkmanager --install "ndk;${{ env.NDK_VERSION }}" "cmake;3.22.1"
 
       - name: Create debug keystore
         run: |
