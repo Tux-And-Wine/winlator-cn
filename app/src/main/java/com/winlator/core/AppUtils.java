@@ -211,15 +211,18 @@ public abstract class AppUtils {
 
     public static void showHelpBox(Context context, View anchor, String text) {
         int padding = (int)UnitUtils.dpToPx(8);
+        int screenWidthDp = (int)UnitUtils.pxToDp(getScreenWidth());
+        int textViewWidthDp = Math.min(284, screenWidthDp - 40);
+        int popupWidthDp = Math.min(300, screenWidthDp - 20);
         TextView textView = new TextView(context);
-        textView.setLayoutParams(new ViewGroup.LayoutParams((int)UnitUtils.dpToPx(284), ViewGroup.LayoutParams.WRAP_CONTENT));
+        textView.setLayoutParams(new ViewGroup.LayoutParams((int)UnitUtils.dpToPx(textViewWidthDp), ViewGroup.LayoutParams.WRAP_CONTENT));
         textView.setPadding(padding, padding, padding, padding);
         textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
         textView.setText(Html.fromHtml(text, Html.FROM_HTML_MODE_LEGACY));
         int widthMeasureSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
         int heightMeasureSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
         textView.measure(widthMeasureSpec, heightMeasureSpec);
-        showPopupWindow(anchor, textView, 300, textView.getMeasuredHeight());
+        showPopupWindow(anchor, textView, popupWidthDp, textView.getMeasuredHeight());
     }
 
     public static int getVersionCode(Context context) {

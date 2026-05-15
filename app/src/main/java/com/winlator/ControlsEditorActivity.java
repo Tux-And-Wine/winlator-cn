@@ -466,7 +466,9 @@ public class ControlsEditorActivity extends AppCompatActivity implements View.On
 
         updateLayout.run();
 
-        elementSettingsPopup = AppUtils.showPopupWindow(anchorView, view, 340, 0);
+        int screenWidthDp = (int)UnitUtils.pxToDp(AppUtils.getScreenWidth());
+        int popupWidthDp = Math.min(340, screenWidthDp - 40);
+        elementSettingsPopup = AppUtils.showPopupWindow(anchorView, view, popupWidthDp, 0);
         elementSettingsPopup.setOnDismissListener(() -> {
             if (element.getType() == ControlElement.Type.BUTTON) {
                 String text = etCustomText.getText().toString().trim();

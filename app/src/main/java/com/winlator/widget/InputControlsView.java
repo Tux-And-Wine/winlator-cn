@@ -117,7 +117,7 @@ public class InputControlsView extends View {
             return;
         }
 
-        snappingSize = width / 100;
+        snappingSize = Math.max(width, height) / 100;
         readyToDraw = true;
 
         if (editMode) {
