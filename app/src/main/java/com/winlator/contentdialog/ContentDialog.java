@@ -56,6 +56,15 @@ public class ContentDialog extends Dialog {
 
         setContentView(contentView);
 
+        // Adjust FrameLayout width for portrait mode screens
+        FrameLayout frameLayout = contentView.findViewById(R.id.FrameLayout);
+        if (frameLayout != null && frameLayout.getVisibility() == View.VISIBLE) {
+            int preferredWidthPx = AppUtils.getPreferredDialogWidth(context);
+            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams)frameLayout.getLayoutParams();
+            params.width = preferredWidthPx;
+            frameLayout.setLayoutParams(params);
+        }
+
         // Adjust EditText width for portrait mode screens
         EditText editText = contentView.findViewById(R.id.EditText);
         if (editText != null) {
