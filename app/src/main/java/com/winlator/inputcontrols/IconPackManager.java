@@ -24,6 +24,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
+import java.io.ObjectStreamClass;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -539,9 +540,30 @@ public class IconPackManager {
     }
 
     private static IconPack deserializeIconPack(byte[] bytes) throws IOException, ClassNotFoundException {
-        try (ObjectInputStream objectInputStream = new ObjectInputStream(new ByteArrayInputStream(bytes))) {
+        try (ObjectInputStream objectInputStream = new CompatibleIconPackObjectInputStream(new ByteArrayInputStream(bytes))) {
             return (IconPack)objectInputStream.readObject();
         }
+    }
+
+    private static class CompatibleIconPackObjectInputStream extends ObjectInputStream {
+        CompatibleIconPackObjectInputStream(InputStream inputStream) throws IOException {
+            super(inputStream);
+        }
+
+        @Override
+        protected ObjectStreamClass readClassDescriptor() throws IOException, ClassNotFoundException {
+            ObjectStreamClass descriptor = super.readClassDescriptor();
+            Class<?> compatibleClass = getCompatibleIconPackClass(descriptor.getName());
+            ObjectStreamClass compatibleDescriptor = compatibleClass != null ? ObjectStreamClass.lookup(compatibleClass) : null;
+            return compatibleDescriptor != null ? compatibleDescriptor : descriptor;
+        }
+    }
+
+    private static Class<?> getCompatibleIconPackClass(String className) {
+        if (IconPack.class.getName().equals(className)) return IconPack.class;
+        if (Icon.class.getName().equals(className)) return Icon.class;
+        if (BitmapData.class.getName().equals(className)) return BitmapData.class;
+        return null;
     }
 
     private static boolean isSerializedIpk(byte[] bytes) {
